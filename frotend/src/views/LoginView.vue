@@ -67,7 +67,6 @@ const roleConfig = computed(() =>
         accountPlaceholder: "请输入学号",
         passwordHint: "使用教务系统或统一身份认证密码",
         buttonText: "登录学生端",
-        note: "进入后可查看成绩趋势、课程表现和学业概览。",
       }
     : {
         title: "教师登录",
@@ -75,7 +74,6 @@ const roleConfig = computed(() =>
         accountPlaceholder: "请输入工号",
         passwordHint: "使用教师工号绑定的教务账号密码",
         buttonText: "登录教师端",
-        note: "进入后可查看班级成绩分布、异常预警和教学评估。",
       },
 )
 
@@ -155,19 +153,17 @@ function handleSubmit() {
 
     <section class="relative z-10 mx-auto flex min-h-[calc(100vh-144px)] w-full max-w-6xl items-center justify-center px-5 pb-16 pt-6 sm:px-8">
       <Card class="w-full max-w-[430px] rounded-lg border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.12)]">
-        <CardHeader class="space-y-3 border-b border-slate-100 px-7 pb-5 pt-7">
-          <div class="flex items-center justify-between gap-4">
-            <div>
-              <CardTitle class="font-display text-2xl font-semibold text-slate-950">
-                教务统一登录
-              </CardTitle>
-              <CardDescription class="mt-2 text-sm leading-6 text-slate-500">
-                请选择身份后登录系统。
-              </CardDescription>
-            </div>
-            <div class="grid size-11 place-items-center rounded-lg bg-teal-50 text-[#0f766e]">
-              <GraduationCap class="size-5" />
-            </div>
+        <CardHeader class="place-items-center space-y-3 border-b border-slate-100 px-7 pb-5 pt-7 text-center">
+          <div class="grid size-11 place-items-center rounded-lg bg-teal-50 text-[#0f766e]">
+            <GraduationCap class="size-5" />
+          </div>
+          <div>
+            <CardTitle class="font-display text-2xl font-semibold text-slate-950">
+              教务统一登录
+            </CardTitle>
+            <CardDescription class="mt-2 text-sm leading-6 text-slate-500">
+              请选择身份后登录系统
+            </CardDescription>
           </div>
         </CardHeader>
 
@@ -234,8 +230,7 @@ function handleSubmit() {
                   </p>
                 </div>
 
-                <div class="flex items-center justify-between gap-4 text-sm">
-                  <span class="min-w-0 truncate text-slate-500">{{ roleConfig.note }}</span>
+                <div class="flex items-center justify-end gap-4 text-sm">
                   <RouterLink class="shrink-0 font-medium text-[#0f766e] hover:text-[#155e75]" to="/forgot-password">
                     忘记密码
                   </RouterLink>
@@ -287,8 +282,7 @@ function handleSubmit() {
                   </p>
                 </div>
 
-                <div class="flex items-center justify-between gap-4 text-sm">
-                  <span class="min-w-0 truncate text-slate-500">{{ roleConfig.note }}</span>
+                <div class="flex items-center justify-end gap-4 text-sm">
                   <RouterLink class="shrink-0 font-medium text-[#0f766e] hover:text-[#155e75]" to="/forgot-password">
                     忘记密码
                   </RouterLink>
