@@ -39,6 +39,21 @@ type TeacherLoginForm = {
 const activeRole = ref<Role>("student")
 const loginSuccess = ref(false)
 
+const poeticSentences = [
+  "书山有路勤为径，学海无涯苦作舟。",
+  "博学之，审问之，慎思之，明辨之，笃行之。",
+  "业精于勤，荒于嬉；行成于思，毁于随。",
+  "纸上得来终觉浅，绝知此事要躬行。",
+  "黑发不知勤学早，白首方悔读书迟。",
+  "问渠那得清如许？为有源头活水来。",
+  "路漫漫其修远兮，吾将上下而求索。",
+  "学而不思则罔，思而不学则殆。",
+  "千里之行，始于足下。",
+  "不积跬步，无以至千里；不积小流，无以成江海。",
+]
+
+const currentSentence = ref(poeticSentences[Math.floor(Math.random() * poeticSentences.length)])
+
 const studentForm = reactive<StudentLoginForm>({
   studentId: "",
   password: "",
@@ -298,6 +313,10 @@ function handleSubmit() {
         </CardContent>
       </Card>
     </section>
+
+    <p class="relative z-10 pb-4 text-center text-sm text-slate-400 italic">
+      {{ currentSentence }}
+    </p>
 
     <footer class="relative z-10 pb-6 text-center text-xs text-slate-500">
       教务支持中心 · 数据仅用于教学管理与学业分析
