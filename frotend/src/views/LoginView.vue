@@ -3,6 +3,8 @@ import {
   ArrowRight,
   Building2,
   CircleCheckBig,
+  Eye,
+  EyeOff,
   GraduationCap,
   KeyRound,
   Landmark,
@@ -38,6 +40,8 @@ type TeacherLoginForm = {
 
 const activeRole = ref<Role>("student")
 const loginSuccess = ref(false)
+const showStudentPassword = ref(false)
+const showTeacherPassword = ref(false)
 
 const poeticSentences = [
   "书山有路勤为径，学海无涯苦作舟。",
@@ -235,10 +239,19 @@ function handleSubmit() {
                       id="student-password"
                       v-model="studentForm.password"
                       :aria-invalid="studentErrors.password ? 'true' : 'false'"
-                      class="h-10 rounded-lg bg-white pl-9"
+                      class="h-10 rounded-lg bg-white pl-9 pr-10"
                       placeholder="请输入密码"
-                      type="password"
+                      :type="showStudentPassword ? 'text' : 'password'"
                     />
+                    <button
+                      type="button"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                      aria-label="切换密码可见性"
+                      @click="showStudentPassword = !showStudentPassword"
+                    >
+                      <EyeOff v-if="showStudentPassword" class="size-4" />
+                      <Eye v-else class="size-4" />
+                    </button>
                   </div>
                   <p v-if="studentErrors.password" class="text-sm text-red-600">
                     {{ studentErrors.password }}
@@ -287,10 +300,19 @@ function handleSubmit() {
                       id="teacher-password"
                       v-model="teacherForm.password"
                       :aria-invalid="teacherErrors.password ? 'true' : 'false'"
-                      class="h-10 rounded-lg bg-white pl-9"
+                      class="h-10 rounded-lg bg-white pl-9 pr-10"
                       placeholder="请输入密码"
-                      type="password"
+                      :type="showTeacherPassword ? 'text' : 'password'"
                     />
+                    <button
+                      type="button"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                      aria-label="切换密码可见性"
+                      @click="showTeacherPassword = !showTeacherPassword"
+                    >
+                      <EyeOff v-if="showTeacherPassword" class="size-4" />
+                      <Eye v-else class="size-4" />
+                    </button>
                   </div>
                   <p v-if="teacherErrors.password" class="text-sm text-red-600">
                     {{ teacherErrors.password }}
