@@ -5,6 +5,8 @@ import {
   Building2,
   CheckCircle,
   CircleCheckBig,
+  Eye,
+  EyeOff,
   KeyRound,
   Landmark,
   Mail,
@@ -33,7 +35,24 @@ type Step = 1 | 2 | 3 | 4
 const currentStep = ref<Step>(1)
 const activeRole = ref<Role>("student")
 const countdown = ref(0)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+const poeticSentences = [
+  "书山有路勤为径，学海无涯苦作舟。",
+  "博学之，审问之，慎思之，明辨之，笃行之。",
+  "业精于勤，荒于嬉；行成于思，毁于随。",
+  "纸上得来终觉浅，绝知此事要躬行。",
+  "黑发不知勤学早，白首方悔读书迟。",
+  "问渠那得清如许？为有源头活水来。",
+  "路漫漫其修远兮，吾将上下而求索。",
+  "学而不思则罔，思而不学则殆。",
+  "千里之行，始于足下。",
+  "不积跬步，无以至千里；不积小流，无以成江海。",
+]
+
+const currentSentence = ref(poeticSentences[Math.floor(Math.random() * poeticSentences.length)])
 
 const form = reactive({
   accountId: "",
@@ -419,10 +438,19 @@ function handleBack() {
                     id="new-password"
                     v-model="form.newPassword"
                     :aria-invalid="errors.newPassword ? 'true' : 'false'"
-                    class="h-10 rounded-lg bg-white pl-9"
+                    class="h-10 rounded-lg bg-white pl-9 pr-10"
                     placeholder="请输入新密码（至少6位）"
-                    type="password"
+                    :type="showNewPassword ? 'text' : 'password'"
                   />
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    aria-label="切换密码可见性"
+                    @click="showNewPassword = !showNewPassword"
+                  >
+                    <EyeOff v-if="showNewPassword" class="size-4" />
+                    <Eye v-else class="size-4" />
+                  </button>
                 </div>
                 <p v-if="errors.newPassword" class="text-sm text-red-600">
                   {{ errors.newPassword }}
@@ -437,10 +465,19 @@ function handleBack() {
                     id="confirm-password"
                     v-model="form.confirmPassword"
                     :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
-                    class="h-10 rounded-lg bg-white pl-9"
+                    class="h-10 rounded-lg bg-white pl-9 pr-10"
                     placeholder="请再次输入新密码"
-                    type="password"
+                    :type="showConfirmPassword ? 'text' : 'password'"
                   />
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    aria-label="切换密码可见性"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                  >
+                    <EyeOff v-if="showConfirmPassword" class="size-4" />
+                    <Eye v-else class="size-4" />
+                  </button>
                 </div>
                 <p v-if="errors.confirmPassword" class="text-sm text-red-600">
                   {{ errors.confirmPassword }}
@@ -500,6 +537,10 @@ function handleBack() {
         </CardContent>
       </Card>
     </section>
+
+    <p class="relative z-10 pb-4 text-center text-sm text-slate-400 italic">
+      {{ currentSentence }}
+    </p>
 
     <footer class="relative z-10 pb-6 text-center text-xs text-slate-500">
       教务支持中心 · 数据仅用于教学管理与学业分析
