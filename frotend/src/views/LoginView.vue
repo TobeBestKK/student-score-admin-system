@@ -11,7 +11,7 @@ import {
   UserRound,
 } from "@lucide/vue"
 import { computed, reactive, ref, watch } from "vue"
-import { RouterLink } from "vue-router"
+import { RouterLink, useRouter } from "vue-router"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+import { login as loginApi } from "@/api/auth"
+
 type Role = "student" | "teacher"
 
 type StudentLoginForm = {
@@ -38,8 +40,11 @@ type TeacherLoginForm = {
   password: string
 }
 
+const router = useRouter()
 const activeRole = ref<Role>("student")
 const loginSuccess = ref(false)
+const loginError = ref("")
+const isLoading = ref(false)
 const showStudentPassword = ref(false)
 const showTeacherPassword = ref(false)
 
@@ -98,6 +103,7 @@ const roleConfig = computed(() =>
 
 watch(activeRole, () => {
   loginSuccess.value = false
+  loginError.value = ""
   clearErrors()
 })
 
@@ -108,9 +114,13 @@ function clearErrors() {
   teacherErrors.password = ""
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   loginSuccess.value = false
+  loginError.value = ""
   clearErrors()
+
+  let username = ""
+  let password = ""
 
   if (activeRole.value === "student") {
     if (!studentForm.studentId.trim()) {
@@ -124,6 +134,9 @@ function handleSubmit() {
     if (studentErrors.studentId || studentErrors.password) {
       return
     }
+
+    username = studentForm.studentId
+    password = studentForm.password
   } else {
     if (!teacherForm.teacherId.trim()) {
       teacherErrors.teacherId = "请输入工号"
@@ -136,9 +149,40 @@ function handleSubmit() {
     if (teacherErrors.teacherId || teacherErrors.password) {
       return
     }
+
+    username = teacherForm.teacherId
+    password = teacherForm.password
   }
 
-  loginSuccess.value = true
+  isLoading.value = true
+
+  try {
+    const response = await loginApi({
+      username,
+      password,
+      role: activeRole.value,
+    })
+
+    if (response.success) {
+      localStorage.setItem("token", response.token)
+      localStorage.setItem("userInfo", JSON.stringify(response.userInfo))
+      loginSuccess.value = true
+
+      setTimeout(() => {
+        if (activeRole.value === "student") {
+          router.push("/student-dashboard")
+        } else {
+          router.push("/dashboard")
+        }
+      }, 1500)
+    } else {
+      loginError.value = response.message
+    }
+  } catch (error) {
+    loginError.value = "登录失败，请稍后重试"
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -194,7 +238,17 @@ function handleSubmit() {
             <CircleCheckBig class="mt-0.5 size-4" />
             <AlertTitle>登录成功</AlertTitle>
             <AlertDescription>
-              当前为 UI 占位提示，暂未接入真实接口和页面跳转。
+              正在跳转至系统首页...
+            </AlertDescription>
+          </Alert>
+
+          <Alert
+            v-if="loginError"
+            class="rounded-lg border-red-200 bg-red-50 text-red-900"
+          >
+            <AlertTitle>登录失败</AlertTitle>
+            <AlertDescription>
+              {{ loginError }}
             </AlertDescription>
           </Alert>
 
@@ -264,7 +318,7 @@ function handleSubmit() {
                   </RouterLink>
                 </div>
 
-                <Button class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
+                <Button :disabled="isLoading" class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
                   {{ roleConfig.buttonText }}
                   <ArrowRight class="size-4" />
                 </Button>
@@ -325,7 +379,7 @@ function handleSubmit() {
                   </RouterLink>
                 </div>
 
-                <Button class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
+                <Button :disabled="isLoading" class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
                   {{ roleConfig.buttonText }}
                   <ArrowRight class="size-4" />
                 </Button>
