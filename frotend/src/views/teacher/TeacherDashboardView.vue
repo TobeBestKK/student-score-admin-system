@@ -202,7 +202,7 @@ function renderChart() {
       {
         type: "bar",
         data: counts,
-        barWidth: "50%",
+        barWidth: "70%",
         itemStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: "#155e75" },

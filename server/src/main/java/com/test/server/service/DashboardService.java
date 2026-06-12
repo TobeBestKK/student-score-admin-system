@@ -70,13 +70,13 @@ public class DashboardService {
     public ScoreDistributionDTO getScoreDistribution(Long courseId) {
         if (courseId == null) {
             return new ScoreDistributionDTO(
-                    Arrays.asList("0-59", "60-69", "70-79", "80-89", "90-100"),
-                    Arrays.asList(0L, 0L, 0L, 0L, 0L)
+                    Arrays.asList("0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-100"),
+                    Arrays.asList(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L)
             );
         }
 
         List<Object[]> rows = scoreRecordRepository.findScoreDistributionByCourseId(courseId);
-        String[] allLabels = {"0-59", "60-69", "70-79", "80-89", "90-100"};
+        String[] allLabels = {"0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-100"};
         Map<String, Long> map = new LinkedHashMap<>();
         for (String label : allLabels) {
             map.put(label, 0L);

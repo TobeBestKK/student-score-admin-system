@@ -32,7 +32,12 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
     long countPassingStudentsByCourseIds(@Param("courseIds") List<Long> courseIds);
 
     @Query(value = "SELECT CASE " +
-            "WHEN score_value < 60 THEN '0-59' " +
+            "WHEN score_value < 10 THEN '0-9' " +
+            "WHEN score_value < 20 THEN '10-19' " +
+            "WHEN score_value < 30 THEN '20-29' " +
+            "WHEN score_value < 40 THEN '30-39' " +
+            "WHEN score_value < 50 THEN '40-49' " +
+            "WHEN score_value < 60 THEN '50-59' " +
             "WHEN score_value < 70 THEN '60-69' " +
             "WHEN score_value < 80 THEN '70-79' " +
             "WHEN score_value < 90 THEN '80-89' " +
