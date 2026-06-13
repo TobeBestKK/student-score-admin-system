@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -21,4 +22,13 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT DISTINCT c.academicYear, c.semester FROM Course c WHERE c.academicYear IS NOT NULL ORDER BY c.academicYear DESC, c.semester")
     List<Object[]> findDistinctYearSemesters();
+
+    @Query("SELECT COALESCE(SUM(c.credit), 0) FROM Course c WHERE c.isDeleted = 0")
+    BigDecimal sumTotalCredit();
+
+    @Query("SELECT COALESCE(SUM(c.credit), 0) FROM Course c WHERE c.isDeleted = 0 " +
+           "AND (:academicYear IS NULL OR c.academicYear = :academicYear) " +
+           "AND (:semester IS NULL OR c.semester = :semester)")
+    BigDecimal sumTotalCreditByFilters(@Param("academicYear") String academicYear, 
+                                       @Param("semester") String semester);
 }

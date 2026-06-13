@@ -276,6 +276,13 @@ public class DashboardService {
             }
         }
 
+        // 计算总学分（动态）
+        BigDecimal totalCredit = courseRepository.sumTotalCreditByFilters(academicYear, semester);
+
+        // 计算学分预警（阈值 60%）
+        BigDecimal creditThreshold = totalCredit.multiply(BigDecimal.valueOf(0.6));
+        boolean creditWarning = earnedCredit.compareTo(creditThreshold) < 0;
+
         return new StudentStatsDTO(
                 totalScore.setScale(1, RoundingMode.HALF_UP),
                 averageScore,
@@ -284,7 +291,9 @@ public class DashboardService {
                 classRank,
                 classTotal,
                 gradeRank,
-                gradeTotal
+                gradeTotal,
+                totalCredit.setScale(1, RoundingMode.HALF_UP),
+                creditWarning
         );
     }
 

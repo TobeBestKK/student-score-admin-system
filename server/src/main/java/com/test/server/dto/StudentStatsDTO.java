@@ -16,4 +16,6 @@ public class StudentStatsDTO {
     private int classTotal;
     private int gradeRank;
     private int gradeTotal;
+    private BigDecimal totalCredit;
+    private boolean creditWarning;
 }

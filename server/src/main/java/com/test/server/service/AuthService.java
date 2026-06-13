@@ -77,7 +77,7 @@ public class AuthService {
                 id,
                 user.getUsername(),
                 name,
-                user.getRole() != null ? user.getRole().getRoleName() : null,
+                roleCode,
                 roleCode,
                 className,
                 studentNo,

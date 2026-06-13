@@ -1,0 +1,32 @@
+import api from './index'
+
+export interface WarningItem {
+  type: string
+  level: string
+  courseName: string | null
+  currentValue: string
+  threshold: string
+  reason: string
+}
+
+export interface StudentWarnings {
+  studentId: number
+  studentNo: string
+  studentName: string
+  className: string
+  maxLevel: string | null
+  failCount: number
+  warnings: WarningItem[]
+}
+
+export function fetchWarnings(params?: { grade?: number; classId?: number; level?: string; type?: string }): Promise<StudentWarnings[]> {
+  return api.get('/warnings', { params })
+}
+
+export function fetchClassWarnings(classId: number): Promise<StudentWarnings[]> {
+  return api.get(`/warnings/class/${classId}`)
+}
+
+export function fetchStudentWarnings(studentId: number): Promise<StudentWarnings> {
+  return api.get('/student/warnings', { params: { studentId } })
+}

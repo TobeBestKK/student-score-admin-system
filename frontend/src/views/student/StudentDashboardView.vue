@@ -306,7 +306,7 @@ function renderTrendChart() {
 // ========== 预警计算 ==========
 const warnings = computed(() => {
   return scores.value
-    .filter((s) => s.scoreValue < 70)
+    .filter((s) => s.scoreValue < 40)
     .map((s) => ({
       courseName: s.courseName,
       examType: s.examType,
@@ -707,6 +707,20 @@ watch(trendSelectedSeries, () => {
               <p class="mt-2 text-sm text-[#64748b]">暂无趋势数据</p>
             </div>
           </div>
+        </div>
+
+        <!-- 学分不足预警 -->
+        <div v-if="stats?.creditWarning" 
+             class="rounded-lg border border-[#fed7aa] bg-[#fff7ed] p-4 mb-4">
+          <div class="flex items-center gap-2">
+            <AlertTriangle class="size-4 text-[#ea580c]" />
+            <h2 class="text-sm font-semibold text-[#9a3412]">学分不足预警</h2>
+          </div>
+          <p class="mt-2 text-sm text-[#9a3412]">
+            当前已获学分：<span class="font-semibold">{{ stats.earnedCredit }}</span> / 
+            总学分 <span class="font-semibold">{{ stats.totalCredit }}</span>
+            （不足 60%）
+          </p>
         </div>
 
         <!-- 不及格预警 -->

@@ -113,6 +113,8 @@ export interface StudentStats {
   classTotal: number
   gradeRank: number
   gradeTotal: number
+  totalCredit: number
+  creditWarning: boolean
 }
 
 export interface ScoreTrend {
