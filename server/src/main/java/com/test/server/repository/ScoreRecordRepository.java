@@ -95,4 +95,109 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
             "ORDER BY co.academic_year DESC, co.semester",
             nativeQuery = true)
     List<Object[]> findDistinctYearSemesters();
+
+    // ========== 学生端查询 ==========
+
+    @Query(value = "SELECT sr.* FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "ORDER BY co.academic_year DESC, co.semester, co.course_name",
+            nativeQuery = true)
+    List<ScoreRecord> findByStudentAndFilters(
+            @Param("studentId") Long studentId,
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT COUNT(*) + 1 FROM score_record sr " +
+            "JOIN student s ON sr.student_id = s.id " +
+            "WHERE sr.course_id = :courseId AND sr.exam_type = :examType AND sr.is_deleted = 0 " +
+            "AND s.class_id = (SELECT class_id FROM student WHERE id = :studentId) " +
+            "AND sr.score_value > (SELECT score_value FROM score_record " +
+            "WHERE student_id = :studentId AND course_id = :courseId AND exam_type = :examType AND is_deleted = 0)",
+            nativeQuery = true)
+    int countClassRank(
+            @Param("studentId") Long studentId,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT COUNT(*) + 1 FROM score_record sr " +
+            "WHERE sr.course_id = :courseId AND sr.exam_type = :examType AND sr.is_deleted = 0 " +
+            "AND sr.score_value > (SELECT score_value FROM score_record " +
+            "WHERE student_id = :studentId AND course_id = :courseId AND exam_type = :examType AND is_deleted = 0)",
+            nativeQuery = true)
+    int countGradeRank(
+            @Param("studentId") Long studentId,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT COUNT(*) FROM score_record sr " +
+            "JOIN student s ON sr.student_id = s.id " +
+            "WHERE sr.course_id = :courseId AND sr.exam_type = :examType AND sr.is_deleted = 0 " +
+            "AND s.class_id = (SELECT class_id FROM student WHERE id = :studentId)",
+            nativeQuery = true)
+    int countClassTotal(
+            @Param("studentId") Long studentId,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT COUNT(*) FROM score_record sr " +
+            "WHERE sr.course_id = :courseId AND sr.exam_type = :examType AND sr.is_deleted = 0",
+            nativeQuery = true)
+    int countGradeTotal(
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT sr.* FROM score_record sr " +
+            "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
+            "ORDER BY sr.create_time DESC",
+            nativeQuery = true)
+    List<ScoreRecord> findByStudentIdAllSemesters(@Param("studentId") Long studentId);
+
+    @Query(value = "SELECT " +
+            "(SELECT AVG(sr2.score_value) FROM score_record sr2 " +
+            " JOIN student s2 ON sr2.student_id = s2.id " +
+            " WHERE sr2.course_id = :courseId AND sr2.exam_type = :examType AND sr2.is_deleted = 0 " +
+            " AND s2.class_id = (SELECT class_id FROM student WHERE id = :studentId)) AS class_avg, " +
+            "(SELECT AVG(sr3.score_value) FROM score_record sr3 " +
+            " WHERE sr3.course_id = :courseId AND sr3.exam_type = :examType AND sr3.is_deleted = 0) AS grade_avg",
+            nativeQuery = true)
+    List<Object[]> findCourseAverages(
+            @Param("studentId") Long studentId,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT student_id, SUM(score_value) AS total FROM score_record sr " +
+            "JOIN student s ON sr.student_id = s.id " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE s.class_id = :classId " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND sr.is_deleted = 0 " +
+            "GROUP BY student_id " +
+            "ORDER BY total DESC",
+            nativeQuery = true)
+    List<Object[]> findClassTotalScoreRanking(
+            @Param("classId") Long classId,
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT student_id, SUM(score_value) AS total FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND sr.is_deleted = 0 " +
+            "GROUP BY student_id " +
+            "ORDER BY total DESC",
+            nativeQuery = true)
+    List<Object[]> findGradeTotalScoreRanking(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
 }

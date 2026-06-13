@@ -65,8 +65,16 @@ public class AuthService {
 
         String token = generateToken(user);
 
+        Long id = user.getId();
+        if ("student".equalsIgnoreCase(request.getRole())) {
+            Student student = studentRepository.findByUserId(user.getId()).orElse(null);
+            if (student != null) {
+                id = student.getId();
+            }
+        }
+
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(
-                user.getId(),
+                id,
                 user.getUsername(),
                 name,
                 user.getRole() != null ? user.getRole().getRoleName() : null,

@@ -63,4 +63,43 @@ public class DashboardController {
             @RequestParam(defaultValue = "5") int limit) {
         return ResponseEntity.ok(dashboardService.getRecentRecords(limit));
     }
+
+    // ========== 学生端接口 ==========
+
+    @GetMapping("/student/profile")
+    public ResponseEntity<StudentProfileDTO> getStudentProfile(@RequestParam Long studentId) {
+        return ResponseEntity.ok(dashboardService.getStudentProfile(studentId));
+    }
+
+    @GetMapping("/student/scores")
+    public ResponseEntity<List<StudentCourseScoreDTO>> getStudentScores(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getStudentScores(studentId, academicYear, semester, examType));
+    }
+
+    @GetMapping("/student/stats")
+    public ResponseEntity<StudentStatsDTO> getStudentStats(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getStudentStats(studentId, academicYear, semester, examType));
+    }
+
+    @GetMapping("/student/trend")
+    public ResponseEntity<ScoreTrendDTO> getScoreTrend(@RequestParam Long studentId) {
+        return ResponseEntity.ok(dashboardService.getScoreTrend(studentId));
+    }
+
+    @GetMapping("/student/radar")
+    public ResponseEntity<RadarChartDTO> getRadarData(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getRadarData(studentId, academicYear, semester, examType));
+    }
 }

@@ -2,8 +2,11 @@ package com.test.server.service;
 
 import com.test.server.dto.*;
 import com.test.server.entity.Course;
+import com.test.server.entity.ScoreRecord;
+import com.test.server.entity.Student;
 import com.test.server.repository.CourseRepository;
 import com.test.server.repository.ScoreRecordRepository;
+import com.test.server.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ public class DashboardService {
 
     private final CourseRepository courseRepository;
     private final ScoreRecordRepository scoreRecordRepository;
+    private final StudentRepository studentRepository;
 
     public List<CourseOptionDTO> getCourseOptions() {
         List<Course> courses = courseRepository.findAll();
@@ -175,5 +179,160 @@ public class DashboardService {
                 .filter(c -> semester == null || semester.isEmpty() || semester.equals(c.getSemester()))
                 .map(Course::getId)
                 .toList();
+    }
+
+    // ========== 学生端方法 ==========
+
+    public StudentProfileDTO getStudentProfile(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("学生不存在"));
+        return new StudentProfileDTO(
+                student.getId(),
+                student.getName(),
+                student.getStudentNo(),
+                student.getClassInfo().getClassName(),
+                student.getClassInfo().getMajor(),
+                student.getClassInfo().getGrade(),
+                student.getEnrollmentYear()
+        );
+    }
+
+    public List<StudentCourseScoreDTO> getStudentScores(Long studentId, String academicYear, String semester, String examType) {
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentAndFilters(studentId, academicYear, semester, examType);
+        List<StudentCourseScoreDTO> result = new ArrayList<>();
+
+        for (ScoreRecord record : records) {
+            Long courseId = record.getCourseId();
+            String type = record.getExamType();
+
+            int classRank = scoreRecordRepository.countClassRank(studentId, courseId, type);
+            int classTotal = scoreRecordRepository.countClassTotal(studentId, courseId, type);
+            int gradeRank = scoreRecordRepository.countGradeRank(studentId, courseId, type);
+            int gradeTotal = scoreRecordRepository.countGradeTotal(courseId, type);
+
+            result.add(new StudentCourseScoreDTO(
+                    courseId,
+                    record.getCourse().getCourseName(),
+                    record.getScoreValue(),
+                    type,
+                    record.getCourse().getCredit(),
+                    classRank,
+                    classTotal,
+                    gradeRank,
+                    gradeTotal
+            ));
+        }
+        return result;
+    }
+
+    public StudentStatsDTO getStudentStats(Long studentId, String academicYear, String semester, String examType) {
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentAndFilters(studentId, academicYear, semester, examType);
+
+        BigDecimal totalScore = BigDecimal.ZERO;
+        BigDecimal earnedCredit = BigDecimal.ZERO;
+        int failCount = 0;
+        int count = records.size();
+
+        for (ScoreRecord record : records) {
+            BigDecimal score = record.getScoreValue();
+            totalScore = totalScore.add(score);
+
+            if (score.compareTo(BigDecimal.valueOf(60)) >= 0) {
+                earnedCredit = earnedCredit.add(record.getCourse().getCredit());
+            } else {
+                failCount++;
+            }
+        }
+
+        BigDecimal averageScore = count > 0
+                ? totalScore.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // 计算班级总分排名
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("学生不存在"));
+        Long classId = student.getClassId();
+
+        List<Object[]> classRanking = scoreRecordRepository.findClassTotalScoreRanking(classId, academicYear, semester, examType);
+        int classRank = 0;
+        int classTotal = classRanking.size();
+        for (int i = 0; i < classRanking.size(); i++) {
+            Long sid = ((Number) classRanking.get(i)[0]).longValue();
+            if (sid.equals(studentId)) {
+                classRank = i + 1;
+                break;
+            }
+        }
+
+        // 计算年级总分排名
+        List<Object[]> gradeRanking = scoreRecordRepository.findGradeTotalScoreRanking(academicYear, semester, examType);
+        int gradeRank = 0;
+        int gradeTotal = gradeRanking.size();
+        for (int i = 0; i < gradeRanking.size(); i++) {
+            Long sid = ((Number) gradeRanking.get(i)[0]).longValue();
+            if (sid.equals(studentId)) {
+                gradeRank = i + 1;
+                break;
+            }
+        }
+
+        return new StudentStatsDTO(
+                totalScore.setScale(1, RoundingMode.HALF_UP),
+                averageScore,
+                earnedCredit.setScale(1, RoundingMode.HALF_UP),
+                failCount,
+                classRank,
+                classTotal,
+                gradeRank,
+                gradeTotal
+        );
+    }
+
+    public ScoreTrendDTO getScoreTrend(Long studentId) {
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentIdAllSemesters(studentId);
+
+        List<String> labels = new ArrayList<>();
+        List<BigDecimal> studentScores = new ArrayList<>();
+        List<BigDecimal> classAverages = new ArrayList<>();
+        List<BigDecimal> gradeAverages = new ArrayList<>();
+
+        for (ScoreRecord record : records) {
+            Course course = record.getCourse();
+            String label = course.getAcademicYear() + " " + course.getSemester() + " " + record.getExamType() + " " + course.getCourseName();
+            labels.add(label);
+            studentScores.add(record.getScoreValue());
+
+            List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, record.getCourseId(), record.getExamType());
+            Object[] avgs = avgList.isEmpty() ? new Object[]{null, null} : avgList.get(0);
+            BigDecimal classAvg = avgs[0] != null ? ((BigDecimal) avgs[0]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            BigDecimal gradeAvg = avgs[1] != null ? ((BigDecimal) avgs[1]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            classAverages.add(classAvg);
+            gradeAverages.add(gradeAvg);
+        }
+
+        return new ScoreTrendDTO(labels, studentScores, classAverages, gradeAverages);
+    }
+
+    public RadarChartDTO getRadarData(Long studentId, String academicYear, String semester, String examType) {
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentAndFilters(studentId, academicYear, semester, examType);
+
+        List<String> courseNames = new ArrayList<>();
+        List<BigDecimal> studentScores = new ArrayList<>();
+        List<BigDecimal> classAverages = new ArrayList<>();
+        List<BigDecimal> gradeAverages = new ArrayList<>();
+
+        for (ScoreRecord record : records) {
+            courseNames.add(record.getCourse().getCourseName());
+            studentScores.add(record.getScoreValue());
+
+            List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, record.getCourseId(), record.getExamType());
+            Object[] avgs = avgList.isEmpty() ? new Object[]{null, null} : avgList.get(0);
+            BigDecimal classAvg = avgs[0] != null ? ((BigDecimal) avgs[0]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            BigDecimal gradeAvg = avgs[1] != null ? ((BigDecimal) avgs[1]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            classAverages.add(classAvg);
+            gradeAverages.add(gradeAvg);
+        }
+
+        return new RadarChartDTO(courseNames, studentScores, classAverages, gradeAverages);
     }
 }
