@@ -158,9 +158,13 @@ public class DashboardService {
             return Collections.emptyList();
         }
 
-        List<Object[]> rows = scoreRecordRepository.findRecentRecordsByCourseIds(courseIds, limit);
+        List<Object[]> rows = scoreRecordRepository.findRecentRecordsByCourseIds(courseIds);
         List<RecentRecordDTO> result = new ArrayList<>();
+        int count = 0;
         for (Object[] row : rows) {
+            if (count >= limit) {
+                break;
+            }
             Long id = ((Number) row[0]).longValue();
             String studentName = (String) row[1];
             String courseName = (String) row[2];
@@ -168,6 +172,7 @@ public class DashboardService {
             String examType = (String) row[4];
             LocalDateTime createTime = ((Timestamp) row[5]).toLocalDateTime();
             result.add(new RecentRecordDTO(id, studentName, courseName, scoreValue, examType, createTime));
+            count++;
         }
         return result;
     }

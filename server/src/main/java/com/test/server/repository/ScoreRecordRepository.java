@@ -84,10 +84,9 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
             "JOIN student s ON sr.student_id = s.id " +
             "JOIN course co ON sr.course_id = co.id " +
             "WHERE sr.course_id IN :courseIds AND sr.is_deleted = 0 " +
-            "ORDER BY sr.create_time DESC " +
-            "LIMIT :limit",
+            "ORDER BY sr.create_time DESC",
             nativeQuery = true)
-    List<Object[]> findRecentRecordsByCourseIds(@Param("courseIds") List<Long> courseIds, @Param("limit") int limit);
+    List<Object[]> findRecentRecordsByCourseIds(@Param("courseIds") List<Long> courseIds);
 
     @Query(value = "SELECT DISTINCT co.academic_year, co.semester " +
             "FROM course co " +
