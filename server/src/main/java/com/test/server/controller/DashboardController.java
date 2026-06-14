@@ -28,8 +28,9 @@ public class DashboardController {
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsDTO> getStats(
             @RequestParam(required = false) String academicYear,
-            @RequestParam(required = false) String semester) {
-        return ResponseEntity.ok(dashboardService.getStats(academicYear, semester));
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) Long teacherId) {
+        return ResponseEntity.ok(dashboardService.getStats(academicYear, semester, teacherId));
     }
 
     @GetMapping("/distribution")

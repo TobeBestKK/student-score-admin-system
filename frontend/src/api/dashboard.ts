@@ -56,7 +56,7 @@ export function fetchSemesterOptions(): Promise<SemesterOption[]> {
   return api.get('/dashboard/semesters')
 }
 
-export function fetchDashboardStats(params?: { academicYear?: string; semester?: string }): Promise<DashboardStats> {
+export function fetchDashboardStats(params?: { academicYear?: string; semester?: string; teacherId?: number }): Promise<DashboardStats> {
   return api.get('/dashboard/stats', { params })
 }
 

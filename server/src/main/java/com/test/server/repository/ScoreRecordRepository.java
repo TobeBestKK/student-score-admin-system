@@ -25,8 +25,12 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
     @Query("SELECT COUNT(DISTINCT sr.studentId) FROM ScoreRecord sr WHERE sr.courseId IN :courseIds AND sr.examType = '期末' AND sr.scoreValue < 60")
     long countFailingStudentsByCourseIds(@Param("courseIds") List<Long> courseIds);
 
-    @Query("SELECT MAX(sr.scoreValue) FROM ScoreRecord sr WHERE sr.courseId IN :courseIds AND sr.examType = '期末'")
-    BigDecimal findMaxScoreByCourseIds(@Param("courseIds") List<Long> courseIds);
+    @Query(value = "SELECT SUM(sr.score_value) FROM score_record sr " +
+            "WHERE sr.course_id IN :courseIds AND sr.exam_type = '期末' AND sr.is_deleted = 0 " +
+            "GROUP BY sr.student_id " +
+            "ORDER BY SUM(sr.score_value) DESC LIMIT 1",
+            nativeQuery = true)
+    BigDecimal findMaxTotalScoreByCourseIds(@Param("courseIds") List<Long> courseIds);
 
     @Query("SELECT COUNT(DISTINCT sr.studentId) FROM ScoreRecord sr WHERE sr.courseId IN :courseIds AND sr.examType = '期末' AND sr.scoreValue >= 60")
     long countPassingStudentsByCourseIds(@Param("courseIds") List<Long> courseIds);
