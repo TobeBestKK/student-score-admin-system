@@ -349,4 +349,55 @@ public class DashboardService {
 
         return new RadarChartDTO(courseNames, studentScores, classAverages, gradeAverages);
     }
+
+    // ========== 年级排名查询 ==========
+
+    public List<GradeTotalRankDTO> getGradeTotalRanking(String academicYear, String semester, String examType) {
+        List<Object[]> rows = scoreRecordRepository.findGradeTotalRanking(academicYear, semester, examType);
+        List<GradeTotalRankDTO> result = new ArrayList<>();
+
+        int rank = 1;
+        for (Object[] row : rows) {
+            Long studentId = ((Number) row[0]).longValue();
+            String name = (String) row[1];
+            String className = (String) row[2];
+            BigDecimal totalScore = (BigDecimal) row[3];
+            BigDecimal avgScore = row[4] != null ? (BigDecimal) row[4] : BigDecimal.ZERO;
+
+            // 获取该学生的各科成绩
+            List<CourseScoreDTO> courses = getStudentCourses(studentId, academicYear, semester, examType);
+
+            result.add(new GradeTotalRankDTO(studentId, name, className, totalScore, avgScore, courses));
+            rank++;
+        }
+
+        return result;
+    }
+
+    private List<CourseScoreDTO> getStudentCourses(Long studentId, String academicYear, String semester, String examType) {
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentAndFilters(studentId, academicYear, semester, examType);
+        List<CourseScoreDTO> courses = new ArrayList<>();
+
+        for (ScoreRecord record : records) {
+            courses.add(new CourseScoreDTO(record.getCourse().getCourseName(), record.getScoreValue()));
+        }
+
+        return courses;
+    }
+
+    public List<CourseRankDTO> getCourseRanking(String courseName, String academicYear, String semester, String examType) {
+        List<Object[]> rows = scoreRecordRepository.findCourseRanking(courseName, academicYear, semester, examType);
+        List<CourseRankDTO> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            Long studentId = ((Number) row[0]).longValue();
+            String name = (String) row[1];
+            String className = (String) row[2];
+            BigDecimal score = (BigDecimal) row[3];
+
+            result.add(new CourseRankDTO(studentId, name, className, score));
+        }
+
+        return result;
+    }
 }

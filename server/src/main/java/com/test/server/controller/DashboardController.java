@@ -102,4 +102,23 @@ public class DashboardController {
             @RequestParam(required = false) String examType) {
         return ResponseEntity.ok(dashboardService.getRadarData(studentId, academicYear, semester, examType));
     }
+
+    // ========== 年级排名接口 ==========
+
+    @GetMapping("/student/grade-total-ranking")
+    public ResponseEntity<List<GradeTotalRankDTO>> getGradeTotalRanking(
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getGradeTotalRanking(academicYear, semester, examType));
+    }
+
+    @GetMapping("/student/course-ranking")
+    public ResponseEntity<List<CourseRankDTO>> getCourseRanking(
+            @RequestParam String courseName,
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getCourseRanking(courseName, academicYear, semester, examType));
+    }
 }
