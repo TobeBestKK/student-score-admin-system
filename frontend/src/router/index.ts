@@ -17,6 +17,7 @@ const router = createRouter({
         { path: "overview", name: "teacher-overview", component: () => import("@/views/teacher/TeacherOverviewView.vue") },
         { path: "classes", name: "teacher-classes", component: () => import("@/views/teacher/ClassListView.vue") },
         { path: "classes/:id", name: "teacher-class-detail", component: () => import("@/views/teacher/ClassDetailView.vue") },
+        { path: "students", name: "teacher-students", component: () => import("@/views/teacher/StudentManageView.vue") },
         { path: "warnings", name: "teacher-warnings", component: () => import("@/views/teacher/TeacherWarningsView.vue") },
       ],
     },
@@ -27,6 +28,7 @@ const router = createRouter({
       children: [
         { path: "", redirect: "/student/overview" },
         { path: "overview", name: "student-overview", component: () => import("@/views/student/StudentOverviewView.vue") },
+        { path: "scores", name: "student-scores", component: () => import("@/views/student/StudentScoresView.vue") },
         { path: "warnings", name: "student-warnings", component: () => import("@/views/student/StudentWarningsView.vue") },
         { path: "ranking", name: "student-ranking", component: () => import("@/views/student/StudentRankingView.vue") },
       ],
