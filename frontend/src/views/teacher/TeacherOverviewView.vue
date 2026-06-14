@@ -8,7 +8,7 @@ import {
   CheckCircle,
   XCircle,
 } from "@lucide/vue"
-import { ref, onMounted, watch, nextTick } from "vue"
+import { ref, onMounted, onUnmounted, watch, nextTick } from "vue"
 import * as echarts from "echarts"
 import {
   fetchCourseOptions,
@@ -200,14 +200,20 @@ function getWarningColor(type: string) {
   return "text-[#b45309]"
 }
 
+const handleResize = () => {
+  chartInstance?.resize()
+}
+
 onMounted(async () => {
   await loadSemesters()
   await loadCourses()
   await loadAllData()
 
-  window.addEventListener("resize", () => {
-    chartInstance?.resize()
-  })
+  window.addEventListener("resize", handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize)
 })
 
 watch(selectedSemester, () => {

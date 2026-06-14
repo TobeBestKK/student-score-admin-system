@@ -11,7 +11,7 @@ import {
   Target,
   Users,
 } from "@lucide/vue"
-import { ref, onMounted, watch, nextTick, computed } from "vue"
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from "vue"
 import * as echarts from "echarts"
 import {
   fetchSemesterOptions,
@@ -297,16 +297,22 @@ function getScoreBg(score: number) {
   return "bg-[#f1f5f9]"
 }
 
+const handleResize = () => {
+  radarChart?.resize()
+  trendChart?.resize()
+}
+
 onMounted(async () => {
   await loadSemesters()
   await loadProfile()
   await loadScoresAndStats()
   await loadTrend()
 
-  window.addEventListener("resize", () => {
-    radarChart?.resize()
-    trendChart?.resize()
-  })
+  window.addEventListener("resize", handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize)
 })
 
 watch(selectedSemester, () => {

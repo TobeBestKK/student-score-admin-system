@@ -37,7 +37,13 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem("token")
   const userInfoStr = localStorage.getItem("userInfo")
-  const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null
+  let userInfo = null
+  try {
+    userInfo = userInfoStr ? JSON.parse(userInfoStr) : null
+  } catch (e) {
+    console.error("Failed to parse userInfo from localStorage", e)
+    localStorage.removeItem("userInfo")
+  }
 
   if (to.meta.requiresAuth) {
     if (!token) {

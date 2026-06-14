@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from "vue"
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue"
 import { useRoute } from "vue-router"
 import * as echarts from "echarts"
 import {
@@ -169,12 +169,18 @@ function handleTabChange(value: string | number) {
   if (value === "warnings") loadWarnings()
 }
 
+const handleResize = () => {
+  chartInstance?.resize()
+}
+
 onMounted(async () => {
   await Promise.all([loadClassInfo(), loadStudents()])
 
-  window.addEventListener("resize", () => {
-    chartInstance?.resize()
-  })
+  window.addEventListener("resize", handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize)
 })
 
 watch(() => route.params.id, (newId) => {
