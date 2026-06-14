@@ -167,3 +167,45 @@ export function fetchRadarData(params: {
 }): Promise<RadarChart> {
   return api.get('/dashboard/student/radar', { params })
 }
+
+// ========== 年级排名类型 ==========
+
+export interface CourseScore {
+  name: string
+  score: number
+}
+
+export interface GradeTotalRank {
+  studentId: number
+  name: string
+  className: string
+  totalScore: number
+  averageScore: number
+  courses: CourseScore[]
+}
+
+export interface CourseRank {
+  studentId: number
+  name: string
+  className: string
+  score: number
+}
+
+// ========== 年级排名 API ==========
+
+export function fetchGradeTotalRanking(params: {
+  academicYear?: string
+  semester?: string
+  examType?: string
+}): Promise<GradeTotalRank[]> {
+  return api.get('/dashboard/student/grade-total-ranking', { params })
+}
+
+export function fetchCourseRanking(params: {
+  courseName: string
+  academicYear?: string
+  semester?: string
+  examType?: string
+}): Promise<CourseRank[]> {
+  return api.get('/dashboard/student/course-ranking', { params })
+}

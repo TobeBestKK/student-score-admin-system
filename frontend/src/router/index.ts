@@ -28,6 +28,7 @@ const router = createRouter({
         { path: "", redirect: "/student/overview" },
         { path: "overview", name: "student-overview", component: () => import("@/views/student/StudentOverviewView.vue") },
         { path: "warnings", name: "student-warnings", component: () => import("@/views/student/StudentWarningsView.vue") },
+        { path: "ranking", name: "student-ranking", component: () => import("@/views/student/StudentRankingView.vue") },
       ],
     },
   ],

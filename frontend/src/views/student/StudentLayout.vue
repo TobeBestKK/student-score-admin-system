@@ -8,6 +8,7 @@ import {
   BarChart3,
   AlertTriangle,
   ChevronDown,
+  Trophy,
 } from '@lucide/vue'
 
 const router = useRouter()
@@ -21,12 +22,14 @@ const userInfo = computed(() => {
 
 const currentTitle = computed(() => {
   if (route.path.startsWith('/student/warnings')) return '预警中心'
+  if (route.path.startsWith('/student/ranking')) return '我的排名'
   return '学业概览'
 })
 
 const menuItems = [
   { icon: BarChart3, label: '学业概览', path: '/student/overview' },
   { icon: AlertTriangle, label: '预警中心', path: '/student/warnings' },
+  { icon: Trophy, label: '我的排名', path: '/student/ranking' },
 ]
 
 function isActive(path: string) {
