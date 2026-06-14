@@ -44,14 +44,14 @@ public class DashboardService {
         return options;
     }
 
-    public DashboardStatsDTO getStats(String academicYear, String semester) {
-        List<Long> courseIds = filterCourseIds(academicYear, semester);
+    public DashboardStatsDTO getStats(String academicYear, String semester, Long teacherId) {
+        List<Long> courseIds = filterCourseIds(academicYear, semester, teacherId);
 
         long courseCount = courseIds.size();
         long studentCount = scoreRecordRepository.countDistinctStudentsByCourseIds(courseIds);
         BigDecimal avgScore = scoreRecordRepository.findAverageScoreByCourseIds(courseIds);
         long failingCount = scoreRecordRepository.countFailingStudentsByCourseIds(courseIds);
-        BigDecimal maxScore = scoreRecordRepository.findMaxScoreByCourseIds(courseIds);
+        BigDecimal maxScore = scoreRecordRepository.findMaxTotalScoreByCourseIds(courseIds);
         long passingCount = scoreRecordRepository.countPassingStudentsByCourseIds(courseIds);
 
         BigDecimal passRate = BigDecimal.ZERO;
@@ -115,7 +115,7 @@ public class DashboardService {
     }
 
     public List<TopStudentDTO> getTop5Total(String academicYear, String semester) {
-        List<Long> courseIds = filterCourseIds(academicYear, semester);
+        List<Long> courseIds = filterCourseIds(academicYear, semester, null);
         if (courseIds.isEmpty()) {
             return Collections.emptyList();
         }
@@ -133,7 +133,7 @@ public class DashboardService {
     }
 
     public List<WarningDTO> getWarnings(String academicYear, String semester) {
-        List<Long> courseIds = filterCourseIds(academicYear, semester);
+        List<Long> courseIds = filterCourseIds(academicYear, semester, null);
         if (courseIds.isEmpty()) {
             return Arrays.asList(
                     new WarningDTO("不及格", 0),
@@ -170,16 +170,19 @@ public class DashboardService {
             String courseName = (String) row[2];
             BigDecimal scoreValue = (BigDecimal) row[3];
             String examType = (String) row[4];
-            LocalDateTime createTime = ((Timestamp) row[5]).toLocalDateTime();
+            LocalDateTime createTime = row[5] instanceof Timestamp
+                    ? ((Timestamp) row[5]).toLocalDateTime()
+                    : (LocalDateTime) row[5];
             result.add(new RecentRecordDTO(id, studentName, courseName, scoreValue, examType, createTime));
             count++;
         }
         return result;
     }
 
-    private List<Long> filterCourseIds(String academicYear, String semester) {
+    private List<Long> filterCourseIds(String academicYear, String semester, Long teacherId) {
         List<Course> courses = courseRepository.findAll();
         return courses.stream()
+                .filter(c -> teacherId == null || teacherId.equals(c.getTeacherId()))
                 .filter(c -> academicYear == null || academicYear.isEmpty() || academicYear.equals(c.getAcademicYear()))
                 .filter(c -> semester == null || semester.isEmpty() || semester.equals(c.getSemester()))
                 .map(Course::getId)

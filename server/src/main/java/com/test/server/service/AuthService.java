@@ -71,6 +71,11 @@ public class AuthService {
             if (student != null) {
                 id = student.getId();
             }
+        } else if ("teacher".equalsIgnoreCase(request.getRole())) {
+            Teacher teacher = teacherRepository.findByUserId(user.getId()).orElse(null);
+            if (teacher != null) {
+                id = teacher.getId();
+            }
         }
 
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(

@@ -35,6 +35,12 @@ const selectedSemester = ref("")
 const courseOptions = ref<CourseOption[]>([])
 const selectedCourseId = ref<number | undefined>(undefined)
 
+const userInfo = ref<{ id: number } | null>(null)
+try {
+  const stored = localStorage.getItem("userInfo")
+  if (stored) userInfo.value = JSON.parse(stored)
+} catch (e) { /* ignore */ }
+
 const statsData = ref<DashboardStats | null>(null)
 const distributionData = ref<ScoreDistribution | null>(null)
 const top5Subject = ref<TopStudent[]>([])
@@ -75,7 +81,7 @@ function getSemesterParams() {
 }
 
 async function loadAllData() {
-  const params = getSemesterParams()
+  const params = { ...getSemesterParams(), teacherId: userInfo.value?.id }
 
   try {
     const [stats, warnings, recent] = await Promise.all([
