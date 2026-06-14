@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 public class StudentCourseScoreDTO {
+    private Long id;
     private Long courseId;
     private String courseName;
     private BigDecimal scoreValue;

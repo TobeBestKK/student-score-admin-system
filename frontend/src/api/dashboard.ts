@@ -93,6 +93,7 @@ export interface StudentProfile {
 }
 
 export interface StudentCourseScore {
+  id: number
   courseId: number
   courseName: string
   scoreValue: number

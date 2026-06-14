@@ -219,6 +219,7 @@ public class DashboardService {
             int gradeTotal = scoreRecordRepository.countGradeTotal(courseId, type);
 
             result.add(new StudentCourseScoreDTO(
+                    record.getId(),
                     courseId,
                     record.getCourse().getCourseName(),
                     record.getScoreValue(),

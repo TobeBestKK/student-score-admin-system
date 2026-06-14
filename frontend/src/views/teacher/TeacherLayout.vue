@@ -23,6 +23,7 @@ const userInfo = computed(() => {
 const currentTitle = computed(() => {
   const path = route.path
   if (path.startsWith('/teacher/classes')) return '班级管理'
+  if (path.startsWith('/teacher/students')) return '学生管理'
   if (path.startsWith('/teacher/warnings')) return '预警中心'
   return '数据概览'
 })
@@ -30,6 +31,7 @@ const currentTitle = computed(() => {
 const menuItems = [
   { icon: BookOpen, label: '数据概览', path: '/teacher/overview' },
   { icon: Users, label: '班级管理', path: '/teacher/classes' },
+  { icon: User, label: '学生管理', path: '/teacher/students' },
   { icon: AlertTriangle, label: '成绩预警', path: '/teacher/warnings' },
 ]
 
