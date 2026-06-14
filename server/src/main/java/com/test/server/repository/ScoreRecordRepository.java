@@ -282,4 +282,42 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
             @Param("studentId") Long studentId,
             @Param("courseId") Long courseId,
             @Param("examType") String examType);
+
+    // ========== 全年级排名查询 ==========
+
+    @Query(value = "SELECT s.id, s.name, ci.class_name, SUM(sr.score_value) AS total_score, " +
+            "ROUND(AVG(sr.score_value), 1) AS avg_score " +
+            "FROM score_record sr " +
+            "JOIN student s ON sr.student_id = s.id " +
+            "JOIN class_info ci ON s.class_id = ci.id " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND sr.is_deleted = 0 " +
+            "GROUP BY s.id, s.name, ci.class_name " +
+            "ORDER BY total_score DESC",
+            nativeQuery = true)
+    List<Object[]> findGradeTotalRanking(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT s.id, s.name, ci.class_name, sr.score_value " +
+            "FROM score_record sr " +
+            "JOIN student s ON sr.student_id = s.id " +
+            "JOIN class_info ci ON s.class_id = ci.id " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE co.course_name = :courseName " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND sr.is_deleted = 0 " +
+            "ORDER BY sr.score_value DESC",
+            nativeQuery = true)
+    List<Object[]> findCourseRanking(
+            @Param("courseName") String courseName,
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
 }
