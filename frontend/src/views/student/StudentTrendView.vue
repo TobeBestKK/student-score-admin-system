@@ -44,11 +44,11 @@ const barChartRef = ref<HTMLElement | null>(null)
 let trendChart: echarts.ECharts | null = null
 let barChart: echarts.ECharts | null = null
 
-const examTypeOptions = [
-  { value: "", label: "全部类型" },
-  { value: "期中", label: "期中" },
-  { value: "期末", label: "期末" },
-]
+const examTypeOptions = computed(() => [
+  { value: "", label: t('student.allExamTypes') },
+  { value: "期中", label: t('score.midterm') },
+  { value: "期末", label: t('score.final') },
+])
 
 function getSemesterParams() {
   if (!selectedSemester.value) return {}
@@ -119,7 +119,7 @@ function renderTrendChart() {
   trendChart.setOption({
     tooltip: { trigger: "axis", axisPointer: { type: "cross" } },
     legend: {
-      data: ["个人成绩", "班级平均", "年级平均"],
+      data: [t('overview.personalScore'), t('overview.classAverage'), t('overview.gradeAverage')],
       top: 0,
       textStyle: { color: "#475569", fontSize: 12 },
     },
@@ -140,7 +140,7 @@ function renderTrendChart() {
     },
     series: [
       {
-        name: "个人成绩",
+        name: t('overview.personalScore'),
         type: "line",
         data: trend.value.studentScores,
         lineStyle: { color: "#155e75", width: 3 },
@@ -150,7 +150,7 @@ function renderTrendChart() {
         smooth: true,
       },
       {
-        name: "班级平均",
+        name: t('overview.classAverage'),
         type: "line",
         data: trend.value.classAverages,
         lineStyle: { color: "#0f766e", width: 2, type: "dashed" },
@@ -159,7 +159,7 @@ function renderTrendChart() {
         symbolSize: 6,
       },
       {
-        name: "年级平均",
+        name: t('overview.gradeAverage'),
         type: "line",
         data: trend.value.gradeAverages,
         lineStyle: { color: "#ca8a04", width: 2, type: "dashed" },
@@ -198,7 +198,7 @@ function renderBarChart() {
   barChart.setOption({
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
     legend: {
-      data: ["最近成绩", "上次成绩"],
+      data: [t('trend.recentScore'), t('trend.lastScore')],
       top: 0,
       textStyle: { color: "#475569", fontSize: 12 },
     },
@@ -219,14 +219,14 @@ function renderBarChart() {
     },
     series: [
       {
-        name: "上次成绩",
+        name: t('trend.lastScore'),
         type: "bar",
         data: prevScores,
         barWidth: "30%",
         itemStyle: { color: "#e2e8f0", borderRadius: [4, 4, 0, 0] },
       },
       {
-        name: "最近成绩",
+        name: t('trend.recentScore'),
         type: "bar",
         data: latestScores,
         barWidth: "30%",
@@ -291,19 +291,19 @@ watch([selectedSemester, selectedExamType], () => {
     <!-- 筛选区 -->
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs text-[#475569] dark:text-gray-400">学期</label>
+        <label class="text-xs text-[#475569] dark:text-gray-400">{{ t('score.semester') }}</label>
         <select
           v-model="selectedSemester"
           class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
         >
-          <option value="">全部学期</option>
+          <option value="">{{ t('student.allSemesters') }}</option>
           <option v-for="opt in semesterOptions" :key="opt.academicYear + '-' + opt.semester" :value="opt.academicYear + '-' + opt.semester">
             {{ opt.label }}
           </option>
         </select>
       </div>
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs text-[#475569] dark:text-gray-400">考试类型</label>
+        <label class="text-xs text-[#475569] dark:text-gray-400">{{ t('score.examType') }}</label>
         <select
           v-model="selectedExamType"
           class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
@@ -326,7 +326,7 @@ watch([selectedSemester, selectedExamType], () => {
         <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b] dark:text-gray-400">最近平均分</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('trend.recentAvg') }}</p>
               <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ stats?.averageScore ?? 0 }}</p>
             </div>
             <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1] dark:bg-teal-900">
@@ -338,7 +338,7 @@ watch([selectedSemester, selectedExamType], () => {
         <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b] dark:text-gray-400">班级排名</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('trend.classRank') }}</p>
               <p class="mt-1 text-2xl font-semibold text-[#155e75] dark:text-teal-400">
                 {{ stats?.classRank ?? 0 }}<span class="text-sm text-[#94a3b8] dark:text-gray-500">/{{ stats?.classTotal ?? 0 }}</span>
               </p>
@@ -352,8 +352,8 @@ watch([selectedSemester, selectedExamType], () => {
         <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b] dark:text-gray-400">进步科目</p>
-              <p class="mt-1 text-2xl font-semibold text-[#15803d] dark:text-green-400">{{ improvedCourses.length }} 门</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('trend.improving') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#15803d] dark:text-green-400">{{ improvedCourses.length }} {{ t('unit.course') }}</p>
             </div>
             <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4] dark:bg-green-900">
               <TrendingUp class="size-5 text-[#15803d] dark:text-green-400" />
@@ -364,8 +364,8 @@ watch([selectedSemester, selectedExamType], () => {
         <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b] dark:text-gray-400">退步科目</p>
-              <p class="mt-1 text-2xl font-semibold text-[#dc2626] dark:text-red-400">{{ declinedCourses.length }} 门</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('trend.declining') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#dc2626] dark:text-red-400">{{ declinedCourses.length }} {{ t('unit.course') }}</p>
             </div>
             <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2] dark:bg-red-900">
               <TrendingDown class="size-5 text-[#dc2626] dark:text-red-400" />
@@ -379,21 +379,21 @@ watch([selectedSemester, selectedExamType], () => {
         <div v-if="bestImprovement && bestImprovement.latestChange > 0" class="rounded-lg border border-[#bbf7d0] bg-[#f0fdf4] p-4 dark:border-green-700 dark:bg-green-900">
           <div class="flex items-center gap-2">
             <ArrowUpRight class="size-5 text-[#15803d] dark:text-green-400" />
-            <span class="text-sm font-semibold text-[#15803d] dark:text-green-400">最大进步</span>
+            <span class="text-sm font-semibold text-[#15803d] dark:text-green-400">{{ t('trend.maxImprove') }}</span>
           </div>
           <p class="mt-1 text-sm text-[#166534] dark:text-green-300">
             <span class="font-medium">{{ bestImprovement.courseName }}</span>
-            进步 <span class="font-semibold">+{{ bestImprovement.latestChange }}</span> 分
+            {{ t('trend.improveUnit') }} <span class="font-semibold">+{{ bestImprovement.latestChange }}</span> {{ t('trend.scoreUnit') }}
           </p>
         </div>
         <div v-if="worstDecline && worstDecline.latestChange < 0" class="rounded-lg border border-[#fecaca] bg-[#fef2f2] p-4 dark:border-red-700 dark:bg-red-900">
           <div class="flex items-center gap-2">
             <ArrowDownRight class="size-5 text-[#dc2626] dark:text-red-400" />
-            <span class="text-sm font-semibold text-[#dc2626] dark:text-red-400">最大退步</span>
+            <span class="text-sm font-semibold text-[#dc2626] dark:text-red-400">{{ t('trend.maxDecline') }}</span>
           </div>
           <p class="mt-1 text-sm text-[#991b1b] dark:text-red-300">
             <span class="font-medium">{{ worstDecline.courseName }}</span>
-            退步 <span class="font-semibold">{{ worstDecline.latestChange }}</span> 分
+            {{ t('trend.declineUnit') }} <span class="font-semibold">{{ worstDecline.latestChange }}</span> {{ t('trend.scoreUnit') }}
           </p>
         </div>
       </div>
@@ -402,12 +402,12 @@ watch([selectedSemester, selectedExamType], () => {
       <div>
         <!-- 各科对比柱状图 -->
         <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-          <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">各科成绩对比（期中 vs 期末）</h2>
+          <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('trend.comparison') }}</h2>
           <div v-if="trendDetail && trendDetail.courseTrends.length > 0" ref="barChartRef" class="h-80 w-full"></div>
           <div v-else class="flex h-80 items-center justify-center">
             <div class="text-center">
               <BarChart3 class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
-              <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">暂无对比数据</p>
+              <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">{{ t('trend.noComparisonData') }}</p>
             </div>
           </div>
         </div>
@@ -415,18 +415,18 @@ watch([selectedSemester, selectedExamType], () => {
 
       <!-- 明细层：各科成绩变化表 -->
       <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">各科成绩变化明细</h2>
+        <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('trend.detail') }}</h2>
         <div v-if="trendDetail && trendDetail.courseTrends.length > 0" class="overflow-x-auto rounded-lg border border-[#e2e8f0] dark:border-gray-700">
           <table class="w-full">
             <thead>
               <tr class="border-b border-[#e2e8f0] bg-[#f8fafc] dark:border-gray-700 dark:bg-gray-700">
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">课程</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">最近成绩</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">上次成绩</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">变化幅度</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">趋势</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">班级平均</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">年级平均</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.course') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('trend.recentScore') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('trend.lastScore') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('trend.changeRange') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('trend.direction') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('overview.classAverage') }}</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('overview.gradeAverage') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -475,7 +475,7 @@ watch([selectedSemester, selectedExamType], () => {
                     <TrendingUp v-if="course.trendDirection === '上升'" class="size-3.5" />
                     <TrendingDown v-else-if="course.trendDirection === '下降'" class="size-3.5" />
                     <Minus v-else class="size-3.5" />
-                    {{ course.trendDirection }}
+                    {{ course.trendDirection === '上升' ? t('trend.up') : course.trendDirection === '下降' ? t('trend.down') : t('trend.flat') }}
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">
@@ -489,7 +489,7 @@ watch([selectedSemester, selectedExamType], () => {
           </table>
         </div>
         <div v-else class="py-12 text-center text-sm text-[#94a3b8] dark:text-gray-500">
-          暂无成绩变化数据
+          {{ t('trend.noChangeData') }}
         </div>
       </div>
     </template>

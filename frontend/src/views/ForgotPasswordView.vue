@@ -129,7 +129,7 @@ function validateStep2(): boolean {
   }
 
   if (form.verificationCode.length !== 6) {
-    errors.verificationCode = "6位数字"
+    errors.verificationCode = t('forgotPassword.codeLength')
     return false
   }
 
@@ -283,11 +283,11 @@ function handleBack() {
               <TabsList class="grid h-10 w-full grid-cols-2 rounded-lg bg-slate-100 p-1">
                 <TabsTrigger value="student" class="rounded-md">
                   <UserRound class="size-4" />
-                  学生
+                  {{ t('login.student') }}
                 </TabsTrigger>
                 <TabsTrigger value="teacher" class="rounded-md">
                   <Building2 class="size-4" />
-                  教师
+                  {{ t('login.teacher') }}
                 </TabsTrigger>
               </TabsList>
 
@@ -325,7 +325,7 @@ function handleBack() {
                   </div>
 
                   <Button type="submit" class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
-                    发送验证码
+                    {{ t('forgotPassword.sendCode') }}
                     <ArrowRight class="size-4" />
                   </Button>
                 </form>
@@ -365,7 +365,7 @@ function handleBack() {
                   </div>
 
                   <Button type="submit" class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
-                    发送验证码
+                    {{ t('forgotPassword.sendCode') }}
                     <ArrowRight class="size-4" />
                   </Button>
                 </form>
@@ -378,19 +378,19 @@ function handleBack() {
             <Alert class="rounded-lg border-blue-200 bg-blue-50 text-blue-900">
               <Mail class="mt-0.5 size-4" />
               <AlertDescription>
-                验证码已发送至您{{ activeRole === 'student' ? '学号' : '工号' }}绑定的邮箱或手机，请注意查收。
+                {{ t('forgotPassword.codeSent') }}{{ activeRole === 'student' ? t('student.studentId') : t('teacher.teacherId') }}
               </AlertDescription>
             </Alert>
 
             <form class="space-y-4" @submit.prevent="handleVerifyCode">
               <div class="space-y-2">
-                <Label for="verification-code">验证码</Label>
+                <Label for="verification-code">{{ t('forgotPassword.code') }}</Label>
                 <Input
                   id="verification-code"
                   v-model="form.verificationCode"
                   :aria-invalid="errors.verificationCode ? 'true' : 'false'"
                   class="h-10 rounded-lg bg-white text-center tracking-[0.5em]"
-                  placeholder="请输入6位验证码"
+                  :placeholder="t('forgotPassword.codePlaceholder')"
                   maxlength="6"
                 />
                 <p v-if="errors.verificationCode" class="text-sm text-red-600">
@@ -400,7 +400,7 @@ function handleBack() {
 
               <div class="flex items-center justify-between text-sm">
                 <span class="text-slate-500">
-                  {{ countdown > 0 ? `${countdown}秒后可重新发送` : '未收到验证码？' }}
+                  {{ countdown > 0 ? `${countdown}${t('forgotPassword.codeCountdown')}` : t('forgotPassword.codeNotReceived') }}
                 </span>
                 <button
                   type="button"
@@ -408,7 +408,7 @@ function handleBack() {
                   :disabled="countdown > 0"
                   @click="handleResendCode"
                 >
-                  重新发送
+                  {{ t('forgotPassword.resend') }}
                 </button>
               </div>
 
@@ -420,10 +420,10 @@ function handleBack() {
                   @click="handleBack"
                 >
                   <ArrowLeft class="size-4" />
-                  返回
+                  {{ t('common.back') }}
                 </Button>
                 <Button type="submit" class="h-10 flex-1 rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
-                  验证
+                  {{ t('forgotPassword.verify') }}
                   <ArrowRight class="size-4" />
                 </Button>
               </div>
@@ -434,7 +434,7 @@ function handleBack() {
           <div v-if="currentStep === 3" class="space-y-5">
             <form class="space-y-4" @submit.prevent="handleResetPassword">
               <div class="space-y-2">
-                <Label for="new-password">新密码</Label>
+                <Label for="new-password">{{ t('settings.newPassword') }}</Label>
                 <div class="relative">
                   <KeyRound class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                   <Input
@@ -442,7 +442,7 @@ function handleBack() {
                     v-model="form.newPassword"
                     :aria-invalid="errors.newPassword ? 'true' : 'false'"
                     class="h-10 rounded-lg bg-white pl-9 pr-10"
-                    placeholder="请输入新密码（至少6位）"
+                    :placeholder="t('settings.inputNewPassword')"
                     :type="showNewPassword ? 'text' : 'password'"
                   />
                   <button
@@ -461,7 +461,7 @@ function handleBack() {
               </div>
 
               <div class="space-y-2">
-                <Label for="confirm-password">确认密码</Label>
+                <Label for="confirm-password">{{ t('settings.confirmPassword') }}</Label>
                 <div class="relative">
                   <KeyRound class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                   <Input
@@ -469,7 +469,7 @@ function handleBack() {
                     v-model="form.confirmPassword"
                     :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
                     class="h-10 rounded-lg bg-white pl-9 pr-10"
-                    placeholder="请再次输入新密码"
+                    :placeholder="t('settings.inputConfirmPassword')"
                     :type="showConfirmPassword ? 'text' : 'password'"
                   />
                   <button
@@ -495,10 +495,10 @@ function handleBack() {
                   @click="handleBack"
                 >
                   <ArrowLeft class="size-4" />
-                  返回
+                  {{ t('common.back') }}
                 </Button>
                 <Button type="submit" class="h-10 flex-1 rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
-                  重置密码
+                  {{ t('forgotPassword.resetPassword') }}
                   <ArrowRight class="size-4" />
                 </Button>
               </div>
@@ -509,23 +509,23 @@ function handleBack() {
           <div v-if="currentStep === 4" class="space-y-5">
             <Alert class="rounded-lg border-emerald-200 bg-emerald-50 text-emerald-900">
               <CircleCheckBig class="mt-0.5 size-4" />
-              <AlertTitle>密码重置成功</AlertTitle>
+              <AlertTitle>{{ t('forgotPassword.resetSuccess') }}</AlertTitle>
               <AlertDescription>
-                您的密码已成功重置，请使用新密码登录系统。
+                {{ t('forgotPassword.resetSuccessDesc') }}
               </AlertDescription>
             </Alert>
 
             <div class="flex flex-col items-center gap-4 pt-2">
               <CheckCircle class="size-16 text-emerald-500" />
               <p class="text-center text-sm text-slate-600">
-                密码已更新，请返回登录页使用新密码登录。
+                {{ t('forgotPassword.passwordUpdated') }}
               </p>
             </div>
 
             <Button as-child class="h-10 w-full rounded-lg bg-[#155e75] text-white hover:bg-[#164e63]">
               <RouterLink to="/login">
                 <ArrowLeft class="size-4" />
-                返回登录页
+                {{ t('forgotPassword.backToLoginBtn') }}
               </RouterLink>
             </Button>
           </div>
@@ -534,7 +534,7 @@ function handleBack() {
           <div v-if="currentStep === 1" class="flex items-center justify-center text-sm">
             <RouterLink class="font-medium text-[#0f766e] hover:text-[#155e75]" to="/login">
               <ArrowLeft class="mr-1 inline-block size-4" />
-              返回登录页
+              {{ t('forgotPassword.backToLoginBtn') }}
             </RouterLink>
           </div>
         </CardContent>
@@ -546,7 +546,7 @@ function handleBack() {
     </p>
 
     <footer class="relative z-10 pb-6 text-center text-xs text-slate-500">
-      教务支持中心 · 数据仅用于教学管理与学业分析
+      {{ t('forgotPassword.footer') }}
     </footer>
   </main>
 </template>

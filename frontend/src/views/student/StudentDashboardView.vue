@@ -10,6 +10,7 @@ import {
   Users,
 } from "@lucide/vue"
 import { ref, onMounted, watch, nextTick, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import * as echarts from "echarts"
 import {
   fetchSemesterOptions,
@@ -42,6 +43,8 @@ try {
   console.error("Failed to get user info", e)
 }
 
+const { t } = useI18n()
+
 // ========== 数据状态 ==========
 const semesterOptions = ref<SemesterOption[]>([])
 const selectedSemester = ref("")
@@ -57,17 +60,17 @@ const radarChartRef = ref<HTMLElement | null>(null)
 const trendChartRef = ref<HTMLElement | null>(null)
 let radarChart: echarts.ECharts | null = null
 let trendChart: echarts.ECharts | null = null
-const radarSelectedSeries = ref<string[]>(["个人成绩", "班级平均", "年级平均"])
-const trendSelectedSeries = ref<string[]>(["个人成绩", "班级平均", "年级平均"])
+const radarSelectedSeries = ref<string[]>([t('overview.personalScore'), t('overview.classAverage'), t('overview.gradeAverage')])
+const trendSelectedSeries = ref<string[]>([t('overview.personalScore'), t('overview.classAverage'), t('overview.gradeAverage')])
 
-const examTypeOptions = [
-  { value: "", label: "全部类型" },
-  { value: "平时", label: "平时" },
-  { value: "期中", label: "期中" },
-  { value: "期末", label: "期末" },
-  { value: "实验", label: "实验" },
-  { value: "综合", label: "综合" },
-]
+const examTypeOptions = computed(() => [
+  { value: "", label: t('student.allExamTypes') },
+  { value: "平时", label: t('score.regular') },
+  { value: "期中", label: t('score.midterm') },
+  { value: "期末", label: t('score.final') },
+  { value: "实验", label: t('score.lab') },
+  { value: "综合", label: t('score.comprehensive') },
+])
 
 // ========== 加载数据 ==========
 async function loadSemesters() {
@@ -152,21 +155,21 @@ function renderRadarChart() {
   const allSeries = [
     {
       value: radarData.value.studentScores,
-      name: "个人成绩",
+      name: t('overview.personalScore'),
       lineStyle: { color: "#155e75", width: 2 },
       areaStyle: { color: "rgba(21, 94, 117, 0.15)" },
       itemStyle: { color: "#155e75" },
     },
     {
       value: radarData.value.classAverages,
-      name: "班级平均",
+      name: t('overview.classAverage'),
       lineStyle: { color: "#15803d", width: 2, type: "dashed" as const },
       areaStyle: { color: "rgba(21, 128, 61, 0.08)" },
       itemStyle: { color: "#15803d" },
     },
     {
       value: radarData.value.gradeAverages,
-      name: "年级平均",
+      name: t('overview.gradeAverage'),
       lineStyle: { color: "#b45309", width: 2, type: "dashed" as const },
       areaStyle: { color: "rgba(180, 83, 9, 0.08)" },
       itemStyle: { color: "#b45309" },
@@ -207,7 +210,7 @@ function renderTrendChart() {
 
   const allSeries = [
     {
-      name: "个人成绩",
+      name: t('overview.personalScore'),
       type: "line" as const,
       data: trend.value.studentScores,
       lineStyle: { color: "#155e75", width: 2 },
@@ -216,7 +219,7 @@ function renderTrendChart() {
       symbolSize: 6,
     },
     {
-      name: "班级平均",
+      name: t('overview.classAverage'),
       type: "line" as const,
       data: trend.value.classAverages,
       lineStyle: { color: "#15803d", width: 2, type: "dashed" as const },
@@ -225,7 +228,7 @@ function renderTrendChart() {
       symbolSize: 6,
     },
     {
-      name: "年级平均",
+      name: t('overview.gradeAverage'),
       type: "line" as const,
       data: trend.value.gradeAverages,
       lineStyle: { color: "#b45309", width: 2, type: "dashed" as const },
@@ -283,7 +286,7 @@ const warnings = computed(() => {
       score: s.scoreValue,
       credit: s.credit,
       level: s.scoreValue < 60 ? "fail" : "warning",
-      message: s.scoreValue < 60 ? "不及格，需补考" : "低分预警，建议加强",
+      message: s.scoreValue < 60 ? t('overview.failAndRetake') : t('overview.lowScoreWarning'),
     }))
 })
 
@@ -339,12 +342,12 @@ watch(trendSelectedSeries, () => {
     <!-- 筛选栏 -->
     <div class="mb-6 flex items-center gap-4">
       <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-[#475569]">学期</label>
+        <label class="text-sm font-medium text-[#475569]">{{ t('score.semester') }}</label>
             <select
               v-model="selectedSemester"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
             >
-              <option value="">全部学期</option>
+              <option value="">{{ t('student.allSemesters') }}</option>
               <option
                 v-for="opt in semesterOptions"
                 :key="opt.academicYear + '-' + opt.semester"
@@ -355,7 +358,7 @@ watch(trendSelectedSeries, () => {
             </select>
           </div>
           <div class="flex items-center gap-2">
-            <label class="text-sm font-medium text-[#475569]">考试类型</label>
+            <label class="text-sm font-medium text-[#475569]">{{ t('score.examType') }}</label>
             <select
               v-model="selectedExamType"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
@@ -379,23 +382,23 @@ watch(trendSelectedSeries, () => {
             </div>
             <div class="flex flex-1 items-center gap-8">
               <div>
-                <p class="text-xs text-[#64748b]">姓名</p>
+                <p class="text-xs text-[#64748b]">{{ t('student.name') }}</p>
                 <p class="text-sm font-semibold text-[#0f172a]">{{ profile.name }}</p>
               </div>
               <div>
-                <p class="text-xs text-[#64748b]">学号</p>
+                <p class="text-xs text-[#64748b]">{{ t('student.studentId') }}</p>
                 <p class="text-sm font-semibold text-[#0f172a]">{{ profile.studentNo }}</p>
               </div>
               <div>
-                <p class="text-xs text-[#64748b]">班级</p>
+                <p class="text-xs text-[#64748b]">{{ t('student.class') }}</p>
                 <p class="text-sm font-semibold text-[#0f172a]">{{ profile.className }}</p>
               </div>
               <div>
-                <p class="text-xs text-[#64748b]">专业</p>
+                <p class="text-xs text-[#64748b]">{{ t('student.major') }}</p>
                 <p class="text-sm font-semibold text-[#0f172a]">{{ profile.major }}</p>
               </div>
               <div>
-                <p class="text-xs text-[#64748b]">入学年份</p>
+                <p class="text-xs text-[#64748b]">{{ t('student.enrollmentYear') }}</p>
                 <p class="text-sm font-semibold text-[#0f172a]">{{ profile.enrollmentYear }}</p>
               </div>
             </div>
@@ -408,7 +411,7 @@ watch(trendSelectedSeries, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">总分</p>
+                <p class="text-sm text-[#64748b]">{{ t('dashboard.totalScore') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ stats?.totalScore ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1]">
@@ -421,7 +424,7 @@ watch(trendSelectedSeries, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">平均分</p>
+                <p class="text-sm text-[#64748b]">{{ t('score.average') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ stats?.averageScore ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#e0f2fe]">
@@ -434,7 +437,7 @@ watch(trendSelectedSeries, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">已获学分</p>
+                <p class="text-sm text-[#64748b]">{{ t('overview.completedCredits') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#15803d]">{{ stats?.earnedCredit ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
@@ -447,8 +450,8 @@ watch(trendSelectedSeries, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">不及格</p>
-                <p class="mt-1 text-2xl font-semibold text-[#dc2626]">{{ stats?.failCount ?? 0 }} 门</p>
+                <p class="text-sm text-[#64748b]">{{ t('score.failCount') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-[#dc2626]">{{ stats?.failCount ?? 0 }} {{ t('unit.course') }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2]">
                 <XCircle class="size-5 text-[#dc2626]" />
@@ -460,7 +463,7 @@ watch(trendSelectedSeries, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">班级排名</p>
+                <p class="text-sm text-[#64748b]">{{ t('ranking.classRanking') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#155e75]">
                   {{ stats?.classRank ?? 0 }}<span class="text-sm text-[#94a3b8]">/{{ stats?.classTotal ?? 0 }}</span>
                 </p>
@@ -475,7 +478,7 @@ watch(trendSelectedSeries, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">年级排名</p>
+                <p class="text-sm text-[#64748b]">{{ t('ranking.gradeRanking') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#b45309]">
                   {{ stats?.gradeRank ?? 0 }}<span class="text-sm text-[#94a3b8]">/{{ stats?.gradeTotal ?? 0 }}</span>
                 </p>
@@ -491,7 +494,7 @@ watch(trendSelectedSeries, () => {
         <div class="mb-6 grid gap-6 lg:grid-cols-2">
           <!-- 各科成绩列表 -->
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
-            <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">各科成绩</h2>
+            <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">{{ t('overview.myScores') }}</h2>
             <div class="space-y-3">
               <div
                 v-for="course in scores"
@@ -510,18 +513,18 @@ watch(trendSelectedSeries, () => {
                   </div>
                   <div>
                     <p class="text-sm font-medium text-[#475569]">{{ course.courseName }}</p>
-                    <p class="text-xs text-[#64748b]">{{ course.examType }} · {{ course.credit }} 学分</p>
+                    <p class="text-xs text-[#64748b]">{{ course.examType }} · {{ course.credit }} {{ t('unit.credit') }}</p>
                   </div>
                 </div>
                 <div class="flex items-center gap-4">
                   <div class="text-right">
-                    <p class="text-xs text-[#155e75]">班级</p>
+                    <p class="text-xs text-[#155e75]">{{ t('student.class') }}</p>
                     <p class="text-sm font-medium text-[#155e75]">
                       {{ course.classRank }}<span class="text-[#94a3b8]">/{{ course.classTotal }}</span>
                     </p>
                   </div>
                   <div class="text-right">
-                    <p class="text-xs text-[#b45309]">年级</p>
+                    <p class="text-xs text-[#b45309]">{{ t('class.grade') }}</p>
                     <p class="text-sm font-medium text-[#b45309]">
                       {{ course.gradeRank }}<span class="text-[#94a3b8]">/{{ course.gradeTotal }}</span>
                     </p>
@@ -529,7 +532,7 @@ watch(trendSelectedSeries, () => {
                 </div>
               </div>
               <div v-if="scores.length === 0" class="py-8 text-center text-sm text-[#94a3b8]">
-                暂无成绩数据
+                {{ t('overview.noScoreData') }}
               </div>
             </div>
           </div>
@@ -537,22 +540,22 @@ watch(trendSelectedSeries, () => {
           <!-- 蛛网图 -->
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="mb-3 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-[#0f172a]">各科成绩雷达图</h2>
+              <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('overview.radarChart') }}</h2>
               <div class="flex items-center gap-4">
                 <label class="flex cursor-pointer items-center gap-1.5 text-xs">
-                  <input type="checkbox" value="个人成绩" v-model="radarSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
+                  <input type="checkbox" :value="t('overview.personalScore')" v-model="radarSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
                   <span class="size-2 rounded-full bg-[#155e75]"></span>
-                  <span class="text-[#475569]">个人成绩</span>
+                  <span class="text-[#475569]">{{ t('overview.personalScore') }}</span>
                 </label>
                 <label class="flex cursor-pointer items-center gap-1.5 text-xs">
-                  <input type="checkbox" value="班级平均" v-model="radarSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
+                  <input type="checkbox" :value="t('overview.classAverage')" v-model="radarSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
                   <span class="size-2 rounded-full bg-[#15803d]"></span>
-                  <span class="text-[#475569]">班级平均</span>
+                  <span class="text-[#475569]">{{ t('overview.classAverage') }}</span>
                 </label>
                 <label class="flex cursor-pointer items-center gap-1.5 text-xs">
-                  <input type="checkbox" value="年级平均" v-model="radarSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
+                  <input type="checkbox" :value="t('overview.gradeAverage')" v-model="radarSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
                   <span class="size-2 rounded-full bg-[#b45309]"></span>
-                  <span class="text-[#475569]">年级平均</span>
+                  <span class="text-[#475569]">{{ t('overview.gradeAverage') }}</span>
                 </label>
               </div>
             </div>
@@ -560,7 +563,7 @@ watch(trendSelectedSeries, () => {
             <div v-else class="flex h-[500px] items-center justify-center">
               <div class="text-center">
                 <Target class="mx-auto size-10 text-[#cbd5e1]" />
-                <p class="mt-2 text-sm text-[#64748b]">暂无数据</p>
+                <p class="mt-2 text-sm text-[#64748b]">{{ t('overview.noRadarData') }}</p>
               </div>
             </div>
           </div>
@@ -569,22 +572,22 @@ watch(trendSelectedSeries, () => {
         <!-- 成绩趋势折线图 -->
         <div class="mb-6 rounded-lg border border-[#e2e8f0] bg-white p-4">
           <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-[#0f172a]">成绩趋势</h2>
+            <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('overview.trendChart') }}</h2>
             <div class="flex items-center gap-4">
               <label class="flex cursor-pointer items-center gap-1.5 text-xs">
-                <input type="checkbox" value="个人成绩" v-model="trendSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
+                <input type="checkbox" :value="t('overview.personalScore')" v-model="trendSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
                 <span class="size-2 rounded-full bg-[#155e75]"></span>
-                <span class="text-[#475569]">个人成绩</span>
+                <span class="text-[#475569]">{{ t('overview.personalScore') }}</span>
               </label>
               <label class="flex cursor-pointer items-center gap-1.5 text-xs">
-                <input type="checkbox" value="班级平均" v-model="trendSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
+                <input type="checkbox" :value="t('overview.classAverage')" v-model="trendSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
                 <span class="size-2 rounded-full bg-[#15803d]"></span>
-                <span class="text-[#475569]">班级平均</span>
+                <span class="text-[#475569]">{{ t('overview.classAverage') }}</span>
               </label>
               <label class="flex cursor-pointer items-center gap-1.5 text-xs">
-                <input type="checkbox" value="年级平均" v-model="trendSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
+                <input type="checkbox" :value="t('overview.gradeAverage')" v-model="trendSelectedSeries" class="size-3.5 rounded border-[#e2e8f0]" />
                 <span class="size-2 rounded-full bg-[#b45309]"></span>
-                <span class="text-[#475569]">年级平均</span>
+                <span class="text-[#475569]">{{ t('overview.gradeAverage') }}</span>
               </label>
             </div>
           </div>
@@ -592,7 +595,7 @@ watch(trendSelectedSeries, () => {
           <div v-else class="flex h-80 items-center justify-center">
             <div class="text-center">
               <TrendingUp class="mx-auto size-10 text-[#cbd5e1]" />
-              <p class="mt-2 text-sm text-[#64748b]">暂无趋势数据</p>
+              <p class="mt-2 text-sm text-[#64748b]">{{ t('overview.noTrendData') }}</p>
             </div>
           </div>
         </div>
@@ -602,12 +605,12 @@ watch(trendSelectedSeries, () => {
              class="rounded-lg border border-[#fed7aa] bg-[#fff7ed] p-4 mb-4">
           <div class="flex items-center gap-2">
             <AlertTriangle class="size-4 text-[#ea580c]" />
-            <h2 class="text-sm font-semibold text-[#9a3412]">学分不足预警</h2>
+            <h2 class="text-sm font-semibold text-[#9a3412]">{{ t('overview.creditWarning') }}</h2>
           </div>
           <p class="mt-2 text-sm text-[#9a3412]">
-            当前已获学分：<span class="font-semibold">{{ stats.earnedCredit }}</span> / 
-            总学分 <span class="font-semibold">{{ stats.totalCredit }}</span>
-            （不足 60%）
+            {{ t('overview.currentCredits') }}：<span class="font-semibold">{{ stats.earnedCredit }}</span> / 
+            {{ t('overview.totalCredits') }} <span class="font-semibold">{{ stats.totalCredit }}</span>
+            （{{ t('overview.insufficient') }}）
           </p>
         </div>
 
@@ -615,7 +618,7 @@ watch(trendSelectedSeries, () => {
         <div v-if="warnings.length > 0" class="rounded-lg border border-[#e2e8f0] bg-white p-4">
           <div class="mb-3 flex items-center gap-2">
             <AlertTriangle class="size-4 text-[#b45309]" />
-            <h2 class="text-sm font-semibold text-[#0f172a]">学业预警</h2>
+            <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('overview.academicWarning') }}</h2>
           </div>
           <div class="space-y-2">
             <div
@@ -655,9 +658,9 @@ watch(trendSelectedSeries, () => {
                     item.level === 'fail' ? 'text-[#dc2626]' : 'text-[#b45309]',
                   ]"
                 >
-                  {{ item.score }} 分
+                  {{ item.score }} {{ t('unit.score') }}
                 </p>
-                <p class="text-xs text-[#94a3b8]">{{ item.credit }} 学分</p>
+                <p class="text-xs text-[#94a3b8]">{{ item.credit }} {{ t('unit.credit') }}</p>
               </div>
             </div>
           </div>

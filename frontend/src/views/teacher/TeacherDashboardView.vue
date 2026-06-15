@@ -2,7 +2,6 @@
 import {
   AlertTriangle,
   BookOpen,
-  User,
   Users,
   Award,
   BarChart3,
@@ -10,6 +9,7 @@ import {
   XCircle,
 } from "@lucide/vue"
 import { ref, onMounted, watch, nextTick } from "vue"
+import { useI18n } from "vue-i18n"
 import * as echarts from "echarts"
 import {
   fetchCourseOptions,
@@ -28,6 +28,8 @@ import {
   type Warning,
   type RecentRecord,
 } from "../../api/dashboard"
+
+const { t } = useI18n()
 
 const userInfo = ref<{
   name: string
@@ -208,7 +210,7 @@ function formatDate(dateStr: string) {
 }
 
 function getWarningColor(type: string) {
-  if (type === "不及格") return "text-[#dc2626]"
+  if (type === t('score.fail')) return "text-[#dc2626]"
   return "text-[#b45309]"
 }
 
@@ -237,12 +239,12 @@ watch(selectedCourseId, () => {
   <div>
     <!-- 学期筛选 -->
     <div class="mb-6 flex items-center gap-3">
-      <label class="text-sm font-medium text-[#475569]">学期筛选</label>
+      <label class="text-sm font-medium text-[#475569]">{{ t('score.semester') }}</label>
           <select
             v-model="selectedSemester"
             class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
           >
-            <option value="">全部学期</option>
+            <option value="">{{ t('student.allSemesters') }}</option>
             <option v-for="opt in semesterOptions" :key="opt.academicYear + '-' + opt.semester" :value="opt.academicYear + '-' + opt.semester">
               {{ opt.label }}
             </option>
@@ -254,7 +256,7 @@ watch(selectedCourseId, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">任教课程</p>
+                <p class="text-sm text-[#64748b]">{{ t('teacher.teachingCourses') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.courseCount ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
@@ -266,7 +268,7 @@ watch(selectedCourseId, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">任教学生</p>
+                <p class="text-sm text-[#64748b]">{{ t('teacher.teachingStudents') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.studentCount ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#eff6ff]">
@@ -278,7 +280,7 @@ watch(selectedCourseId, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">平均分</p>
+                <p class="text-sm text-[#64748b]">{{ t('score.average') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.averageScore ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1]">
@@ -290,7 +292,7 @@ watch(selectedCourseId, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">不及格人数</p>
+                <p class="text-sm text-[#64748b]">{{ t('score.failCount') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#dc2626]">{{ statsData?.failingCount ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2]">
@@ -302,7 +304,7 @@ watch(selectedCourseId, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">最高分</p>
+                <p class="text-sm text-[#64748b]">{{ t('score.highest') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.maxScore ?? 0 }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#fef3c7]">
@@ -314,7 +316,7 @@ watch(selectedCourseId, () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">及格率</p>
+                <p class="text-sm text-[#64748b]">{{ t('score.passRate') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#15803d]">{{ statsData?.passRate ?? 0 }}%</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
@@ -329,12 +331,12 @@ watch(selectedCourseId, () => {
           <!-- 图表区 -->
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 lg:col-span-2">
             <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-[#0f172a]">成绩分布统计</h2>
+              <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('dashboard.scoreDistribution') }}</h2>
               <select
                 v-model="selectedCourseId"
                 class="h-8 rounded-md border border-[#e2e8f0] bg-white px-2.5 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
               >
-                <option :value="undefined">选择课程</option>
+                <option :value="undefined">{{ t('course.selectCourse') }}</option>
                 <option v-for="c in courseOptions" :key="c.id" :value="c.id">
                   {{ c.courseName }}
                 </option>
@@ -345,7 +347,7 @@ watch(selectedCourseId, () => {
 
           <!-- 最近录入 -->
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
-            <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">最近录入</h2>
+            <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">{{ t('dashboard.recentEntry') }}</h2>
             <div class="space-y-2">
               <div
                 v-for="record in recentRecords"
@@ -359,7 +361,7 @@ watch(selectedCourseId, () => {
                 <span class="ml-2 shrink-0 text-sm font-semibold text-[#0f172a]">{{ record.scoreValue }}</span>
               </div>
               <div v-if="recentRecords.length === 0" class="py-8 text-center text-sm text-[#94a3b8]">
-                暂无数据
+                {{ t('common.noData') }}
               </div>
             </div>
           </div>
@@ -370,12 +372,12 @@ watch(selectedCourseId, () => {
           <!-- 单科 TOP5 -->
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="mb-3 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-[#0f172a]">单科成绩 TOP 5</h2>
+              <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('dashboard.singleTop5') }}</h2>
               <select
                 v-model="selectedCourseId"
                 class="h-7 rounded-md border border-[#e2e8f0] bg-white px-2 text-xs text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
               >
-                <option :value="undefined">选择课程</option>
+                <option :value="undefined">{{ t('course.selectCourse') }}</option>
                 <option v-for="c in courseOptions" :key="c.id" :value="c.id">
                   {{ c.courseName }}
                 </option>
@@ -384,10 +386,10 @@ watch(selectedCourseId, () => {
             <table class="w-full">
               <thead>
                 <tr class="border-b border-[#e2e8f0]">
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">排名</th>
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">姓名</th>
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">班级</th>
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">分数</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('dashboard.rank') }}</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('student.name') }}</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('student.class') }}</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('score.score') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -413,22 +415,22 @@ watch(selectedCourseId, () => {
               </tbody>
             </table>
             <div v-if="top5Subject.length === 0" class="py-6 text-center text-sm text-[#94a3b8]">
-              请选择课程查看排名
+              {{ t('dashboard.selectCourseHint') }}
             </div>
           </div>
 
           <!-- 总分 TOP5 -->
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
             <div class="mb-3 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-[#0f172a]">总分成绩 TOP 5</h2>
+              <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('dashboard.totalTop5') }}</h2>
             </div>
             <table class="w-full">
               <thead>
                 <tr class="border-b border-[#e2e8f0]">
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">排名</th>
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">姓名</th>
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">班级</th>
-                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">总分</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('dashboard.rank') }}</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('student.name') }}</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('student.class') }}</th>
+                  <th class="pb-2 text-left text-xs font-medium text-[#64748b]">{{ t('dashboard.totalScore') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -454,7 +456,7 @@ watch(selectedCourseId, () => {
               </tbody>
             </table>
             <div v-if="top5Total.length === 0" class="py-6 text-center text-sm text-[#94a3b8]">
-              暂无数据
+              {{ t('common.noData') }}
             </div>
           </div>
         </div>
@@ -463,7 +465,7 @@ watch(selectedCourseId, () => {
         <div class="mt-6 rounded-lg border border-[#e2e8f0] bg-white p-4">
           <div class="mb-3 flex items-center gap-2">
             <AlertTriangle class="size-4 text-[#b45309]" />
-            <h2 class="text-sm font-semibold text-[#0f172a]">成绩预警</h2>
+            <h2 class="text-sm font-semibold text-[#0f172a]">{{ t('warning.scoreWarning') }}</h2>
           </div>
           <div class="grid gap-4 grid-cols-2 lg:grid-cols-3">
             <div
@@ -472,11 +474,11 @@ watch(selectedCourseId, () => {
               class="rounded-md border border-[#e2e8f0] p-3"
             >
               <p class="text-xs text-[#64748b]">{{ item.type }}</p>
-              <p :class="['mt-1 text-xl font-semibold', getWarningColor(item.type)]">{{ item.count }} 人</p>
+              <p :class="['mt-1 text-xl font-semibold', getWarningColor(item.type)]">{{ item.count }} {{ t('unit.person') }}</p>
             </div>
           </div>
           <div v-if="warningData.length === 0" class="py-6 text-center text-sm text-[#94a3b8]">
-            暂无预警数据
+            {{ t('warning.noWarningData') }}
           </div>
         </div>
       </div> 

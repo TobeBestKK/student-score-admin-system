@@ -14,7 +14,7 @@ import { useTheme } from "@/hooks/useTheme"
 import { setLocale } from "@/i18n"
 
 const { t } = useI18n()
-const { theme, setTheme } = useTheme()
+const { setTheme } = useTheme()
 
 const userInfo = computed(() => {
   const str = localStorage.getItem('userInfo')
@@ -107,10 +107,10 @@ async function saveProfile() {
       localStorage.setItem("userInfo", JSON.stringify(info))
     }
     
-    alert("个人信息已保存")
+    alert(t('settings.profileSaved'))
   } catch (e) {
     console.error("Failed to save profile", e)
-    alert("保存失败")
+    alert(t('settings.saveFailed'))
   } finally {
     loading.value = false
   }
@@ -118,15 +118,15 @@ async function saveProfile() {
 
 async function changePassword() {
   if (securityForm.newPassword !== securityForm.confirmPassword) {
-    alert("新密码和确认密码不一致")
+    alert(t('settings.passwordMismatch'))
     return
   }
   if (securityForm.newPassword.length < 6) {
-    alert("密码长度至少为6位")
+    alert(t('settings.passwordMinLength'))
     return
   }
   try {
-    alert("密码修改成功，请重新登录")
+    alert(t('settings.passwordChanged'))
     securityForm.oldPassword = ""
     securityForm.newPassword = ""
     securityForm.confirmPassword = ""
@@ -246,30 +246,30 @@ function savePreferences() {
           </div>
           <div class="space-y-4">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-[#475569] dark:text-gray-300">当前密码</label>
+              <label class="mb-1.5 block text-sm font-medium text-[#475569] dark:text-gray-300">{{ t('settings.currentPassword') }}</label>
               <input
                 v-model="securityForm.oldPassword"
                 type="password"
                 class="flex h-10 w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="请输入当前密码"
+                :placeholder="t('settings.inputCurrentPassword')"
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-[#475569] dark:text-gray-300">新密码</label>
+              <label class="mb-1.5 block text-sm font-medium text-[#475569] dark:text-gray-300">{{ t('settings.newPassword') }}</label>
               <input
                 v-model="securityForm.newPassword"
                 type="password"
                 class="flex h-10 w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="请输入新密码（至少6位）"
+                :placeholder="t('settings.inputNewPassword')"
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-[#475569] dark:text-gray-300">确认新密码</label>
+              <label class="mb-1.5 block text-sm font-medium text-[#475569] dark:text-gray-300">{{ t('settings.confirmPassword') }}</label>
               <input
                 v-model="securityForm.confirmPassword"
                 type="password"
                 class="flex h-10 w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="请再次输入新密码"
+                :placeholder="t('settings.inputConfirmPassword')"
               />
             </div>
           </div>
@@ -286,7 +286,7 @@ function savePreferences() {
               @click="changePassword"
             >
               <Save class="size-4" />
-              修改密码
+              {{ t('settings.changePassword') }}
             </button>
           </div>
         </div>
@@ -303,7 +303,7 @@ function savePreferences() {
                 v-model="preferences.language"
                 class="flex h-10 w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
-                <option value="zh-CN">简体中文</option>
+                <option value="zh-CN">{{ t('language.zh-CN') }}</option>
                 <option value="en-US">English</option>
               </select>
             </div>
@@ -313,8 +313,8 @@ function savePreferences() {
                 v-model="preferences.theme"
                 class="flex h-10 w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
-                <option value="light">亮色</option>
-                <option value="dark">暗色</option>
+                <option value="light">{{ t('theme.light') }}</option>
+                <option value="dark">{{ t('theme.dark') }}</option>
               </select>
             </div>
             <div v-if="isTeacher">
@@ -323,7 +323,7 @@ function savePreferences() {
                 v-model="preferences.timezone"
                 class="flex h-10 w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
-                <option value="Asia/Shanghai">北京时间 (UTC+8)</option>
+                <option value="Asia/Shanghai">{{ t('settings.bjTime') }}</option>
                 <option value="UTC">UTC</option>
               </select>
             </div>

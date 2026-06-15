@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { BookOpen, TrendingUp, Award, Search } from "@lucide/vue"
+import { BookOpen, TrendingUp, Award } from "@lucide/vue"
 import {
   fetchSemesterOptions,
   fetchStudentScores,
@@ -41,11 +41,11 @@ const stats = ref<StudentStats | null>(null)
 const trend = ref<ScoreTrend | null>(null)
 const loading = ref(false)
 
-const examTypeOptions = [
-  { value: "", label: "全部类型" },
-  { value: "期中", label: "期中" },
-  { value: "期末", label: "期末" },
-]
+const examTypeOptions = computed(() => [
+  { value: "", label: t('student.allExamTypes') },
+  { value: "期中", label: t('score.midterm') },
+  { value: "期末", label: t('score.final') },
+])
 
 const filteredScores = computed(() => {
   if (!keyword.value) return scores.value
@@ -118,11 +118,11 @@ function getScoreBg(score: number) {
 }
 
 function getScoreLabel(score: number) {
-  if (score >= 90) return "优秀"
-  if (score >= 80) return "良好"
-  if (score >= 70) return "中等"
-  if (score >= 60) return "及格"
-  return "不及格"
+  if (score >= 90) return t('score.excellent')
+  if (score >= 80) return t('score.good')
+  if (score >= 70) return t('score.medium')
+  if (score >= 60) return t('score.pass')
+  return t('score.fail')
 }
 
 onMounted(async () => {

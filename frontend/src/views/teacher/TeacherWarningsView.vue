@@ -15,27 +15,27 @@ const selectedClass = ref("")
 const selectedLevel = ref("")
 const selectedType = ref("")
 
-const classOptions = [
-  { value: "", label: "全部班级" },
+const classOptions = computed(() => [
+  { value: "", label: t('warning.allClasses') },
   { value: "1", label: "1班" },
   { value: "2", label: "2班" },
   { value: "3", label: "3班" },
-]
+])
 
-const levelOptions = [
-  { value: "", label: "全部级别" },
-  { value: "普通提醒", label: "普通提醒" },
-  { value: "重点关注", label: "重点关注" },
-  { value: "严重预警", label: "严重预警" },
-]
+const levelOptions = computed(() => [
+  { value: "", label: t('warning.allLevels') },
+  { value: "普通提醒", label: t('warning.normal') },
+  { value: "重点关注", label: t('warning.focus') },
+  { value: "严重预警", label: t('warning.severe') },
+])
 
-const typeOptions = [
-  { value: "", label: "全部类型" },
-  { value: "单科低分", label: "单科低分" },
-  { value: "学期平均分偏低", label: "学期平均分偏低" },
-  { value: "总分排名靠后", label: "总分排名靠后" },
-  { value: "累计不及格", label: "累计不及格" },
-]
+const typeOptions = computed(() => [
+  { value: "", label: t('warning.allTypes') },
+  { value: "单科低分", label: t('warning.lowScore') },
+  { value: "学期平均分偏低", label: t('warning.lowAverage') },
+  { value: "总分排名靠后", label: t('warning.lowRanking') },
+  { value: "累计不及格", label: t('warning.failedCourses') },
+])
 
 const normalCount = computed(() => 
   warnings.value.filter((w) => w.maxLevel === "普通提醒").length
@@ -91,11 +91,11 @@ onMounted(() => {
     <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       <div class="mb-4 flex items-center gap-2">
         <Filter class="size-4 text-[#64748b] dark:text-gray-400" />
-        <h3 class="text-sm font-semibold text-[#0f172a] dark:text-white">筛选条件</h3>
+        <h3 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('warning.filterTitle') }}</h3>
       </div>
-      <div class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-wrap items-end gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-[#64748b] dark:text-gray-400">班级</label>
+          <label class="text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('student.class') }}</label>
           <select
             v-model="selectedClass"
             class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
@@ -106,7 +106,7 @@ onMounted(() => {
           </select>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-[#64748b] dark:text-gray-400">预警级别</label>
+          <label class="text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.level') }}</label>
           <select
             v-model="selectedLevel"
             class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
@@ -117,7 +117,7 @@ onMounted(() => {
           </select>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-[#64748b] dark:text-gray-400">预警类型</label>
+          <label class="text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.type') }}</label>
           <select
             v-model="selectedType"
             class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
@@ -128,8 +128,8 @@ onMounted(() => {
           </select>
         </div>
         <div class="flex items-center gap-2">
-          <Button size="sm" @click="handleSearch" class="dark:bg-teal-700 dark:hover:bg-teal-600">查询</Button>
-          <Button size="sm" variant="outline" @click="handleReset" class="dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">重置</Button>
+          <Button size="sm" @click="handleSearch" class="dark:bg-teal-700 dark:hover:bg-teal-600">{{ t('common.query') }}</Button>
+          <Button size="sm" variant="outline" @click="handleReset" class="dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">{{ t('common.reset') }}</Button>
         </div>
       </div>
     </div>
@@ -137,7 +137,7 @@ onMounted(() => {
     <div class="grid gap-4 md:grid-cols-3">
       <Card class="dark:border-gray-700 dark:bg-gray-800">
         <CardHeader class="pb-2">
-          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">普通提醒</CardTitle>
+          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.normal') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="flex items-center justify-between">
@@ -146,13 +146,13 @@ onMounted(() => {
               <Users class="size-5 text-[#16a34a] dark:text-green-400" />
             </div>
           </div>
-          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">人</p>
+          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">{{ t('unit.person') }}</p>
         </CardContent>
       </Card>
 
       <Card class="dark:border-gray-700 dark:bg-gray-800">
         <CardHeader class="pb-2">
-          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">重点关注</CardTitle>
+          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.focus') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="flex items-center justify-between">
@@ -161,13 +161,13 @@ onMounted(() => {
               <AlertTriangle class="size-5 text-[#ea580c] dark:text-orange-400" />
             </div>
           </div>
-          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">人</p>
+          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">{{ t('unit.person') }}</p>
         </CardContent>
       </Card>
 
       <Card class="dark:border-gray-700 dark:bg-gray-800">
         <CardHeader class="pb-2">
-          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">严重预警</CardTitle>
+          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.severe') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="flex items-center justify-between">
@@ -176,18 +176,18 @@ onMounted(() => {
               <AlertTriangle class="size-5 text-[#dc2626] dark:text-red-400" />
             </div>
           </div>
-          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">人</p>
+          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">{{ t('unit.person') }}</p>
         </CardContent>
       </Card>
     </div>
 
     <div class="space-y-4">
       <div v-if="loading" class="py-12 text-center text-sm text-[#64748b] dark:text-gray-400">
-        加载中...
+        {{ t('common.loading') }}
       </div>
       <div v-else-if="warnings.length === 0" class="py-12 text-center">
         <AlertTriangle class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
-        <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">暂无预警数据</p>
+        <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">{{ t('warning.noWarningData') }}</p>
       </div>
       <div
         v-for="student in warnings"
@@ -221,7 +221,7 @@ onMounted(() => {
               </span>
               <span v-if="item.courseName" class="text-sm text-[#475569] dark:text-gray-400">{{ item.courseName }}</span>
               <span class="text-xs text-[#64748b] dark:text-gray-400">
-                当前值: {{ item.currentValue }} / 阈值: {{ item.threshold }}
+                {{ t('warning.currentValue') }}: {{ item.currentValue }} / {{ t('warning.threshold') }}: {{ item.threshold }}
               </span>
             </div>
             <span class="text-xs text-[#94a3b8] dark:text-gray-500">{{ item.reason }}</span>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { Search, Users, AlertTriangle } from "@lucide/vue"
 import { fetchClasses, type ClassItem, type ClassQuery } from "@/api/class"
@@ -11,16 +12,18 @@ import Button from "@/components/ui/button/Button.vue"
 import Input from "@/components/ui/input/Input.vue"
 import Label from "@/components/ui/label/Label.vue"
 
+const { t } = useI18n()
+
 const router = useRouter()
 const loading = ref(false)
 const classList = ref<ClassItem[]>([])
 
-const gradeOptions = [
-  { label: "高一", value: 1 },
-  { label: "高二", value: 2 },
-  { label: "高三", value: 3 },
-]
-const majorOptions = ["理科", "文科"]
+const gradeOptions = computed(() => [
+  { label: t('class.grade1'), value: 1 },
+  { label: t('class.grade2'), value: 2 },
+  { label: t('class.grade3'), value: 3 },
+])
+const majorOptions = computed(() => [t('class.science'), t('class.arts')])
 
 const query = ref<ClassQuery>({
   grade: undefined,
@@ -48,7 +51,7 @@ function goToDetail(id: number) {
 }
 
 function getGradeName(grade: number) {
-  const map: Record<number, string> = { 1: "高一", 2: "高二", 3: "高三" }
+  const map: Record<number, string> = { 1: t('class.grade1'), 2: t('class.grade2'), 3: t('class.grade3') }
   return map[grade] ?? String(grade)
 }
 
@@ -63,18 +66,18 @@ onMounted(() => {
       <CardHeader>
         <CardTitle class="flex items-center gap-2 text-base">
           <Users class="size-5 text-[#155e75]" />
-          班级管理
+          {{ t('class.management') }}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="mb-6 flex flex-wrap items-end gap-4">
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">年级</Label>
+            <Label class="text-xs">{{ t('class.grade') }}</Label>
             <select
               v-model="query.grade"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
             >
-              <option :value="undefined">全部年级</option>
+              <option :value="undefined">{{ t('student.allGrades') }}</option>
               <option v-for="g in gradeOptions" :key="g.value" :value="g.value">
                 {{ g.label }}
               </option>
@@ -82,12 +85,12 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">科类</Label>
+            <Label class="text-xs">{{ t('student.subjectType') }}</Label>
             <select
               v-model="query.major"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
             >
-              <option :value="undefined">全部科类</option>
+              <option :value="undefined">{{ t('student.allSubjects') }}</option>
               <option v-for="m in majorOptions" :key="m" :value="m">
                 {{ m }}
               </option>
@@ -95,13 +98,13 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">班级名称</Label>
-            <Input v-model="query.keyword" placeholder="输入班级名称" class="w-48" />
+            <Label class="text-xs">{{ t('class.name') }}</Label>
+            <Input v-model="query.keyword" :placeholder="t('class.inputClassName')" class="w-48" />
           </div>
 
           <Button @click="handleSearch" class="bg-[#155e75] hover:bg-[#0e4a5e]">
             <Search class="mr-1.5 size-4" />
-            搜索
+            {{ t('common.search') }}
           </Button>
         </div>
 
@@ -114,13 +117,13 @@ onMounted(() => {
             <table class="w-full">
               <thead>
                 <tr class="border-b border-[#e2e8f0] bg-[#f8fafc]">
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">班级代码</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">班级名称</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">科类</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">年级</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">班主任</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">学生人数</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">预警人数</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('class.code') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('class.name') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('student.subjectType') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('class.grade') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('class.headTeacher') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('class.studentCount') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">{{ t('class.warningCount') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,7 +156,7 @@ onMounted(() => {
 
           <div v-if="classList.length === 0" class="flex flex-col items-center justify-center py-16 text-[#94a3b8]">
             <Users class="mb-2 size-10" />
-            <p class="text-sm">暂无班级数据</p>
+            <p class="text-sm">{{ t('class.noClassData') }}</p>
           </div>
         </div>
       </CardContent>

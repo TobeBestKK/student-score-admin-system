@@ -48,10 +48,10 @@ function getTypeIcon(type: string) {
 }
 
 function getSuggestion(type: string) {
-  if (type === "单科低分") return "建议及时复习薄弱科目，寻求教师辅导"
-  if (type === "学期平均分偏低") return "建议加强日常学习，提高各科均衡性"
-  if (type === "总分排名靠后") return "建议制定学习计划，重点提升弱势科目"
-  if (type === "累计不及格") return "建议尽快准备补考，避免影响学业进度"
+  if (type === "单科低分") return t('warning.suggestLowScore')
+  if (type === "学期平均分偏低") return t('warning.suggestLowAverage')
+  if (type === "总分排名靠后") return t('warning.suggestLowRanking')
+  if (type === "累计不及格") return t('warning.suggestFailed')
   return ""
 }
 
@@ -89,7 +89,7 @@ onMounted(() => {
     <div class="grid gap-4 md:grid-cols-2">
       <Card class="dark:border-gray-700 dark:bg-gray-800">
         <CardHeader class="pb-2">
-          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">挂科门数</CardTitle>
+          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.failCourseCount') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="flex items-center justify-between">
@@ -98,13 +98,13 @@ onMounted(() => {
               <AlertTriangle class="size-5 text-[#dc2626] dark:text-red-400" />
             </div>
           </div>
-          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">门</p>
+          <p class="mt-1 text-xs text-[#64748b] dark:text-gray-400">{{ t('unit.course') }}</p>
         </CardContent>
       </Card>
 
       <Card class="dark:border-gray-700 dark:bg-gray-800">
         <CardHeader class="pb-2">
-          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">当前最高预警级别</CardTitle>
+          <CardTitle class="text-sm font-medium text-[#64748b] dark:text-gray-400">{{ t('warning.maxLevel') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="flex items-center justify-between">
@@ -120,13 +120,13 @@ onMounted(() => {
     </div>
 
     <div class="space-y-4">
-      <h3 class="text-sm font-semibold text-[#0f172a] dark:text-white">预警详情</h3>
+      <h3 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('warning.warningDetails') }}</h3>
       <div v-if="loading" class="py-12 text-center text-sm text-[#64748b] dark:text-gray-400">
-        加载中...
+        {{ t('common.loading') }}
       </div>
       <div v-else-if="warnings.length === 0" class="py-12 text-center">
         <AlertTriangle class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
-        <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">暂无预警信息</p>
+        <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">{{ t('warning.noWarningInfo') }}</p>
       </div>
       <div
         v-for="(item, idx) in warnings"
@@ -144,16 +144,16 @@ onMounted(() => {
         </div>
         <div class="px-4 py-3">
           <div v-if="item.courseName" class="mb-2">
-            <span class="text-xs text-[#64748b] dark:text-gray-400">课程：</span>
+            <span class="text-xs text-[#64748b] dark:text-gray-400">{{ t('warning.courseLabel') }}：</span>
             <span class="text-sm font-medium text-[#475569] dark:text-gray-300">{{ item.courseName }}</span>
           </div>
           <div class="mb-2 flex items-center gap-4">
             <div>
-              <span class="text-xs text-[#64748b] dark:text-gray-400">当前值：</span>
+              <span class="text-xs text-[#64748b] dark:text-gray-400">{{ t('warning.currentValue') }}：</span>
               <span class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ item.currentValue }}</span>
             </div>
             <div>
-              <span class="text-xs text-[#64748b] dark:text-gray-400">阈值：</span>
+              <span class="text-xs text-[#64748b] dark:text-gray-400">{{ t('warning.threshold') }}：</span>
               <span class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ item.threshold }}</span>
             </div>
           </div>
@@ -163,7 +163,7 @@ onMounted(() => {
     </div>
 
     <div v-if="suggestions.length > 0" class="space-y-4">
-      <h3 class="text-sm font-semibold text-[#0f172a] dark:text-white">改进建议</h3>
+      <h3 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('warning.suggestions') }}</h3>
       <div class="grid gap-4 md:grid-cols-2">
         <div
           v-for="item in suggestions"

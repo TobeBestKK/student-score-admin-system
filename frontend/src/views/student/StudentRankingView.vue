@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { Trophy, Medal, Award, Users, BookOpen } from "@lucide/vue"
 import {
@@ -22,7 +22,10 @@ const selectedExamType = ref("")
 const selectedCourse = ref("")
 const rankingType = ref<"grade" | "course">("grade")
 
-const examTypes = ["期中", "期末"]
+const examTypes = computed(() => [
+  { value: "期中", label: t('score.midterm') },
+  { value: "期末", label: t('score.final') },
+])
 
 async function loadSemesterOptions() {
   try {
@@ -88,8 +91,8 @@ onMounted(() => {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-[#0f172a] dark:text-white">成绩排名</h2>
-        <p class="text-sm text-[#64748b] dark:text-gray-400">查看年级和单科排名情况</p>
+        <h2 class="text-lg font-semibold text-[#0f172a] dark:text-white">{{ t('ranking.title') }}</h2>
+        <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('ranking.viewDesc') }}</p>
       </div>
       <div class="flex flex-wrap gap-2">
         <select
@@ -97,38 +100,38 @@ onMounted(() => {
           class="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
           @change="rankingType === 'grade' ? loadGradeRanking() : loadCourseRanking()"
         >
-          <option value="grade">年级排名</option>
-          <option value="course">单科排名</option>
+          <option value="grade">{{ t('ranking.gradeRanking') }}</option>
+          <option value="course">{{ t('ranking.singleCourse') }}</option>
         </select>
         <select v-model="selectedSemester" class="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
-          <option value="">全部学期</option>
+          <option value="">{{ t('student.allSemesters') }}</option>
           <option v-for="opt in semesterOptions" :key="opt.label" :value="opt.label">
             {{ opt.label }}
           </option>
         </select>
         <select v-model="selectedExamType" class="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
-          <option value="">全部考试</option>
-          <option v-for="type in examTypes" :key="type" :value="type">
-            {{ type }}
+          <option value="">{{ t('student.allExamTypes') }}</option>
+          <option v-for="type in examTypes" :key="type.value" :value="type.value">
+            {{ type.label }}
           </option>
         </select>
         <input
           v-if="rankingType === 'course'"
           v-model="selectedCourse"
-          placeholder="输入课程名称"
+          :placeholder="t('class.inputClassName')"
           class="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
         />
         <button
           class="rounded-lg bg-[#155e75] px-4 py-2 text-sm font-medium text-white hover:bg-[#0e7490] dark:bg-teal-700 dark:hover:bg-teal-600"
           @click="rankingType === 'grade' ? loadGradeRanking() : loadCourseRanking()"
         >
-          查询
+          {{ t('common.query') }}
         </button>
       </div>
     </div>
 
     <div v-if="loading" class="py-12 text-center text-sm text-[#64748b] dark:text-gray-400">
-      加载中...
+      {{ t('common.loading') }}
     </div>
 
     <template v-else>
@@ -136,7 +139,7 @@ onMounted(() => {
       <div v-if="rankingType === 'grade'" class="space-y-4">
         <div v-if="gradeRanking.length === 0" class="py-12 text-center">
           <Trophy class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
-          <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">暂无排名数据</p>
+           <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">{{ t('ranking.noRankingData') }}</p>
         </div>
         <div v-else class="space-y-3">
           <div
@@ -156,7 +159,7 @@ onMounted(() => {
               </div>
               <div class="text-right">
                 <p class="text-lg font-bold text-[#0f172a] dark:text-white">{{ student.totalScore }}</p>
-                <p class="text-xs text-[#64748b] dark:text-gray-400">平均 {{ student.averageScore }}</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">{{ t('ranking.average') }} {{ student.averageScore }}</p>
               </div>
             </div>
             <div v-if="student.courses.length > 0" class="border-t border-inherit px-4 py-2">
@@ -178,7 +181,7 @@ onMounted(() => {
       <div v-else class="space-y-4">
         <div v-if="courseRanking.length === 0" class="py-12 text-center">
           <BookOpen class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
-          <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">暂无排名数据</p>
+           <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">{{ t('ranking.noRankingData') }}</p>
         </div>
         <div v-else class="space-y-3">
           <div

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue"
+import { ref, onMounted, watch, computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { FileText, Search, Plus, Pencil, Trash2, X, BarChart3, CheckCircle, XCircle, Hash } from "@lucide/vue"
 import {
@@ -52,18 +52,23 @@ const query = ref<ScoreQuery>({
 const selectedSemester = ref("")
 const stats = ref({ totalRecords: 0, averageScore: 0, passRate: 0, failCount: 0 })
 
-const examTypeOptions = [
-  { value: "", label: "全部类型" },
-  { value: "期中", label: "期中" },
-  { value: "期末", label: "期末" },
-]
+const examTypeOptions = computed(() => [
+  { value: "", label: t('student.allExamTypes') },
+  { value: "期中", label: t('score.midterm') },
+  { value: "期末", label: t('score.final') },
+])
 
 const showModal = ref(false)
 const modalMode = ref<"create" | "edit">("create")
 const currentRecord = ref<ScoreRecord | null>(null)
 const formLoading = ref(false)
 
-const remarkOptions = ["优", "良", "中", "差"]
+const remarkOptions = computed(() => [
+  { value: "优", label: t('score.remarkExcellent') },
+  { value: "良", label: t('score.remarkGood') },
+  { value: "中", label: t('score.remarkMedium') },
+  { value: "差", label: t('score.remarkPoor') },
+])
 
 const form = ref<ScoreRecordCreate>({
   studentId: 0,
@@ -193,20 +198,20 @@ function closeModal() {
 
 async function handleSubmit() {
   if (!form.value.studentId || form.value.studentId <= 0) {
-    alert("请选择学生")
+    alert(t('score.selectStudent'))
     return
   }
   if (!form.value.courseId || form.value.courseId <= 0) {
-    alert("请选择课程")
+    alert(t('score.selectCourse'))
     return
   }
   const score = Number(form.value.scoreValue)
   if (form.value.scoreValue === null || form.value.scoreValue === undefined || isNaN(score) || score < 0 || score > 100) {
-    alert("请输入有效的成绩（0-100）")
+    alert(t('score.scoreRequired'))
     return
   }
   if (!form.value.examType) {
-    alert("请选择考试类型")
+    alert(t('score.selectExamType'))
     return
   }
 
@@ -233,8 +238,8 @@ async function handleSubmit() {
     loadScores()
   } catch (e: any) {
     console.error("Failed to save score", e)
-    const msg = e?.response?.data?.message || e?.message || "操作失败"
-    alert("保存失败：" + msg)
+    const msg = e?.response?.data?.message || e?.message || t('message.operationFailed')
+    alert(t('message.saveFailed') + msg)
   } finally {
     formLoading.value = false
   }
@@ -258,8 +263,8 @@ async function handleDelete() {
     loadScores()
   } catch (e: any) {
     console.error("Failed to delete score", e)
-    const msg = e?.response?.data?.message || e?.message || "删除失败"
-    alert("删除失败：" + msg)
+    const msg = e?.response?.data?.message || e?.message || t('message.deleteFailed')
+    alert(t('message.deleteFailed') + '：' + msg)
   }
 }
 
@@ -302,18 +307,18 @@ onMounted(async () => {
       <CardHeader>
         <CardTitle class="flex items-center gap-2 text-base dark:text-white">
           <FileText class="size-5 text-[#155e75] dark:text-teal-400" />
-          成绩管理
+          {{ t('score.management') }}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="mb-6 flex flex-wrap items-end gap-4">
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs dark:text-gray-400">学期</Label>
+            <Label class="text-xs dark:text-gray-400">{{ t('score.semester') }}</Label>
             <select
               v-model="selectedSemester"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
-              <option value="">全部学期</option>
+              <option value="">{{ t('student.allSemesters') }}</option>
               <option v-for="opt in semesterOptions" :key="opt.academicYear + '-' + opt.semester" :value="opt.academicYear + '-' + opt.semester">
                 {{ opt.label }}
               </option>
@@ -321,12 +326,12 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs dark:text-gray-400">课程</Label>
+            <Label class="text-xs dark:text-gray-400">{{ t('score.course') }}</Label>
             <select
               v-model="query.courseId"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
-              <option :value="undefined">全部课程</option>
+              <option :value="undefined">{{ t('student.allCourses') }}</option>
               <option v-for="c in courseOptions" :key="c.id" :value="c.id">
                 {{ c.courseName }}
               </option>
@@ -334,7 +339,7 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs dark:text-gray-400">考试类型</Label>
+            <Label class="text-xs dark:text-gray-400">{{ t('score.examType') }}</Label>
             <select
               v-model="query.examType"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
@@ -347,17 +352,17 @@ onMounted(async () => {
 
           <div class="flex flex-col gap-1.5">
             <Label class="text-xs dark:text-gray-400">学生姓名/学号</Label>
-            <Input v-model="query.keyword" placeholder="输入姓名或学号" class="w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" />
+            <Input v-model="query.keyword" :placeholder="t('student.searchPlaceholder')" class="w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" />
           </div>
 
           <Button @click="handleSearch" class="bg-[#155e75] hover:bg-[#0e4a5e] dark:bg-teal-700 dark:hover:bg-teal-600">
             <Search class="mr-1.5 size-4" />
-            查询
+            {{ t('common.query') }}
           </Button>
 
           <Button @click="openCreateModal" class="bg-[#0f766e] hover:bg-[#0d5d57] dark:bg-teal-800 dark:hover:bg-teal-700">
             <Plus class="mr-1.5 size-4" />
-            录入成绩
+            {{ t('score.enterScore') }}
           </Button>
         </div>
 
@@ -365,7 +370,7 @@ onMounted(async () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b] dark:text-gray-400">总记录</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('score.totalRecords') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ stats.totalRecords }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1] dark:bg-teal-900">
@@ -377,7 +382,7 @@ onMounted(async () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b] dark:text-gray-400">平均分</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('score.average') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ stats.averageScore }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#e0f2fe] dark:bg-cyan-900">
@@ -389,7 +394,7 @@ onMounted(async () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b] dark:text-gray-400">及格率</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('score.passRate') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#15803d] dark:text-green-400">{{ stats.passRate }}%</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4] dark:bg-green-900">
@@ -401,7 +406,7 @@ onMounted(async () => {
           <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b] dark:text-gray-400">不及格</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('score.failCount') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-[#dc2626] dark:text-red-400">{{ stats.failCount }}</p>
               </div>
               <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2] dark:bg-red-900">
@@ -420,16 +425,16 @@ onMounted(async () => {
             <table class="w-full">
               <thead>
                 <tr class="border-b border-[#e2e8f0] bg-[#f8fafc] dark:border-gray-700 dark:bg-gray-700">
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">学生姓名</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">学号</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">班级</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">课程</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">成绩</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">等级</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">考试类型</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">评语</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">录入时间</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">操作</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('student.name') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('student.studentId') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('student.class') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.course') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.score') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.level') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.examType') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.comment') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('score.recordTime') }}</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">{{ t('common.operation') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -483,14 +488,14 @@ onMounted(async () => {
                         class="h-7 bg-[#f1f5f9] px-2 text-xs text-[#475569] hover:bg-[#e2e8f0] dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                       >
                         <Pencil class="mr-1 size-3" />
-                        编辑
+                        {{ t('common.edit') }}
                       </Button>
                       <Button
                         @click="confirmDelete(record)"
                         class="h-7 bg-[#fef2f2] px-2 text-xs text-[#dc2626] hover:bg-[#fee2e2] dark:bg-red-900 dark:text-red-400 dark:hover:bg-red-800"
                       >
                         <Trash2 class="mr-1 size-3" />
-                        删除
+                        {{ t('common.delete') }}
                       </Button>
                     </div>
                   </td>
@@ -501,7 +506,7 @@ onMounted(async () => {
 
           <div v-if="scoreList.length === 0" class="flex flex-col items-center justify-center py-16 text-[#94a3b8] dark:text-gray-500">
             <FileText class="mb-2 size-10" />
-            <p class="text-sm">暂无成绩数据</p>
+            <p class="text-sm">{{ t('common.noData') }}</p>
           </div>
 
           <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-2">
@@ -532,7 +537,7 @@ onMounted(async () => {
       <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-[0_12px_36px_rgba(15,23,42,0.10)]">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-base font-semibold text-[#0f172a]">
-            {{ modalMode === "create" ? "录入成绩" : "编辑成绩" }}
+            {{ modalMode === "create" ? t('score.enterScore') : t('score.editScore') }}
           </h3>
           <Button @click="closeModal" class="h-7 w-7 bg-transparent p-0 text-[#64748b] hover:bg-[#f1f5f9]">
             <X class="size-4" />
@@ -541,7 +546,7 @@ onMounted(async () => {
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">学生 *</Label>
+            <Label class="text-xs">{{ t('student.name') }} *</Label>
             <select
               v-model="form.studentId"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
@@ -555,7 +560,7 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">课程 *</Label>
+            <Label class="text-xs">{{ t('score.course') }} *</Label>
             <select
               v-model="form.courseId"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
@@ -569,57 +574,57 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">成绩 * (0-100)</Label>
+            <Label class="text-xs">{{ t('score.score') }} * (0-100)</Label>
             <Input
               v-model="form.scoreValue"
               type="number"
               min="0"
               max="100"
               step="0.01"
-              placeholder="请输入成绩"
+              :placeholder="t('common.pleaseInput') + t('score.score')"
               required
             />
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">考试类型 *</Label>
+            <Label class="text-xs">{{ t('score.examType') }} *</Label>
             <select
               v-model="form.examType"
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
               required
             >
-              <option value="期中">期中</option>
-              <option value="期末">期末</option>
+              <option value="期中">{{ t('score.midterm') }}</option>
+              <option value="期末">{{ t('score.final') }}</option>
             </select>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">评语</Label>
+            <Label class="text-xs">{{ t('score.comment') }}</Label>
             <div class="flex gap-2">
               <button
                 v-for="opt in remarkOptions"
-                :key="opt"
+                :key="opt.value"
                 type="button"
-                @click="form.remark = form.remark === opt ? '' : opt"
+                @click="form.remark = form.remark === opt.value ? '' : opt.value"
                 :class="[
                   'rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
-                  form.remark === opt
+                  form.remark === opt.value
                     ? 'border-[#155e75] bg-[#ccfbf1] text-[#0f766e]'
                     : 'border-[#e2e8f0] bg-white text-[#475569] hover:border-[#cbd5e1]',
                 ]"
               >
-                {{ opt }}
+                {{ opt.label }}
               </button>
             </div>
-            <Input v-model="form.remark" placeholder="或输入自定义评语" class="mt-1" />
+            <Input v-model="form.remark" :placeholder="t('score.inputComment')" class="mt-1" />
           </div>
 
           <div class="flex justify-end gap-2 pt-4">
             <Button @click="closeModal" type="button" class="bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0]">
-              取消
+              {{ t('common.cancel') }}
             </Button>
             <Button type="submit" class="bg-[#155e75] hover:bg-[#0e4a5e]" :disabled="formLoading">
-              {{ formLoading ? "保存中..." : (modalMode === "create" ? "录入" : "保存") }}
+              {{ formLoading ? t('score.entering') : (modalMode === "create" ? t('common.enter') : t('common.save')) }}
             </Button>
           </div>
         </form>
@@ -633,17 +638,16 @@ onMounted(async () => {
       @click.self="closeDeleteModal"
     >
       <div class="w-full max-w-sm rounded-lg bg-white p-6 shadow-[0_12px_36px_rgba(15,23,42,0.10)]">
-        <h3 class="text-base font-semibold text-[#0f172a]">确认删除</h3>
+        <h3 class="text-base font-semibold text-[#0f172a]">{{ t('score.confirmDelete') }}</h3>
         <p class="mt-2 text-sm text-[#475569]">
-          确定要删除 <span class="font-semibold text-[#0f172a]">{{ deleteTarget?.studentName }}</span>
-          的 <span class="font-semibold text-[#0f172a]">{{ deleteTarget?.courseName }}</span> 成绩记录吗？
+          {{ t('message.deleteConfirm') }}
         </p>
         <div class="mt-6 flex justify-end gap-2">
           <Button @click="closeDeleteModal" class="bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0]">
-            取消
+            {{ t('common.cancel') }}
           </Button>
           <Button @click="handleDelete" class="bg-[#dc2626] hover:bg-[#b91c1c]">
-            删除
+            {{ t('common.delete') }}
           </Button>
         </div>
       </div>
