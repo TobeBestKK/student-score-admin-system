@@ -20,6 +20,7 @@ const router = createRouter({
         { path: "students", name: "teacher-students", component: () => import("@/views/teacher/StudentManageView.vue") },
         { path: "scores", name: "teacher-scores", component: () => import("@/views/teacher/ScoreManageView.vue") },
         { path: "warnings", name: "teacher-warnings", component: () => import("@/views/teacher/TeacherWarningsView.vue") },
+        { path: "settings", name: "teacher-settings", component: () => import("@/views/SettingsView.vue") },
       ],
     },
     {
@@ -33,6 +34,7 @@ const router = createRouter({
         { path: "trend", name: "student-trend", component: () => import("@/views/student/StudentTrendView.vue") },
         { path: "warnings", name: "student-warnings", component: () => import("@/views/student/StudentWarningsView.vue") },
         { path: "ranking", name: "student-ranking", component: () => import("@/views/student/StudentRankingView.vue") },
+        { path: "settings", name: "student-settings", component: () => import("@/views/SettingsView.vue") },
       ],
     },
   ],

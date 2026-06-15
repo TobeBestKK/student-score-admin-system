@@ -9,6 +9,7 @@ import {
   XCircle,
 } from "@lucide/vue"
 import { ref, onMounted, onUnmounted, watch, nextTick } from "vue"
+import { useI18n } from "vue-i18n"
 import * as echarts from "echarts"
 import {
   fetchCourseOptions,
@@ -29,6 +30,8 @@ import {
 } from "@/api/dashboard"
 import Card from "@/components/ui/card/Card.vue"
 import CardContent from "@/components/ui/card/CardContent.vue"
+
+const { t } = useI18n()
 
 const semesterOptions = ref<SemesterOption[]>([])
 const selectedSemester = ref("")
@@ -229,12 +232,12 @@ watch(selectedCourseId, () => {
 <template>
   <div class="space-y-6">
     <div class="flex items-center gap-3">
-      <label class="text-sm font-medium text-[#475569]">学期筛选</label>
+      <label class="text-sm font-medium text-[#475569] dark:text-gray-300">{{ t('score.semester') }}</label>
       <select
         v-model="selectedSemester"
-        class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+        class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
       >
-        <option value="">全部学期</option>
+        <option value="">{{ t('common.all') }}</option>
         <option v-for="opt in semesterOptions" :key="opt.academicYear + '-' + opt.semester" :value="opt.academicYear + '-' + opt.semester">
           {{ opt.label }}
         </option>
@@ -242,85 +245,85 @@ watch(selectedCourseId, () => {
     </div>
 
     <div class="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">任教课程</p>
-              <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.courseCount ?? 0 }}</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('overview.teachingCourses') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ statsData?.courseCount ?? 0 }}</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
-              <BookOpen class="size-5 text-[#15803d]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4] dark:bg-green-900/30">
+              <BookOpen class="size-5 text-[#15803d] dark:text-green-400" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">任教学生</p>
-              <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.studentCount ?? 0 }}</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('overview.teachingStudents') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ statsData?.studentCount ?? 0 }}</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#eff6ff]">
-              <Users class="size-5 text-[#2563eb]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#eff6ff] dark:bg-blue-900/30">
+              <Users class="size-5 text-[#2563eb] dark:text-blue-400" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">平均分</p>
-              <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.averageScore ?? 0 }}</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('score.average') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ statsData?.averageScore ?? 0 }}</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1]">
-              <BarChart3 class="size-5 text-[#0f766e]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1] dark:bg-teal-900/30">
+              <BarChart3 class="size-5 text-[#0f766e] dark:text-teal-400" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">不及格人数</p>
-              <p class="mt-1 text-2xl font-semibold text-[#dc2626]">{{ statsData?.failingCount ?? 0 }}</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('overview.failingStudents') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#dc2626] dark:text-red-400">{{ statsData?.failingCount ?? 0 }}</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2]">
-              <XCircle class="size-5 text-[#dc2626]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2] dark:bg-red-900/30">
+              <XCircle class="size-5 text-[#dc2626] dark:text-red-400" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">最高分</p>
-              <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ statsData?.maxScore ?? 0 }}</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('overview.maxScore') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ statsData?.maxScore ?? 0 }}</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#fef3c7]">
-              <Award class="size-5 text-[#b45309]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#fef3c7] dark:bg-orange-900/30">
+              <Award class="size-5 text-[#b45309] dark:text-orange-400" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">及格率</p>
-              <p class="mt-1 text-2xl font-semibold text-[#15803d]">{{ statsData?.passRate ?? 0 }}%</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">{{ t('overview.passRate') }}</p>
+              <p class="mt-1 text-2xl font-semibold text-[#15803d] dark:text-green-400">{{ statsData?.passRate ?? 0 }}%</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
-              <CheckCircle class="size-5 text-[#15803d]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4] dark:bg-green-900/30">
+              <CheckCircle class="size-5 text-[#15803d] dark:text-green-400" />
             </div>
           </div>
         </CardContent>
@@ -328,15 +331,15 @@ watch(selectedCourseId, () => {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
-      <Card class="lg:col-span-2 py-4">
+      <Card class="lg:col-span-2 py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-[#0f172a]">成绩分布统计</h2>
+            <h2 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('overview.scoreDistribution') }}</h2>
             <select
               v-model="selectedCourseId"
-              class="h-8 rounded-md border border-[#e2e8f0] bg-white px-2.5 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-8 rounded-md border border-[#e2e8f0] bg-white px-2.5 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
-              <option :value="undefined">选择课程</option>
+              <option :value="undefined">{{ t('common.pleaseSelect') }}</option>
               <option v-for="c in courseOptions" :key="c.id" :value="c.id">
                 {{ c.courseName }}
               </option>
@@ -346,23 +349,23 @@ watch(selectedCourseId, () => {
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
-          <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">最近录入</h2>
+          <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('overview.recentRecords') }}</h2>
           <div class="space-y-2">
             <div
               v-for="record in recentRecords"
               :key="record.id"
-              class="flex items-center justify-between rounded-md border border-[#f1f5f9] p-2.5 hover:bg-[#f8fafc]"
+              class="flex items-center justify-between rounded-md border border-[#f1f5f9] p-2.5 hover:bg-[#f8fafc] dark:border-gray-700 dark:hover:bg-gray-700"
             >
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-[#475569]">{{ record.studentName }} - {{ record.courseName }}</p>
-                <p class="text-xs text-[#64748b]">{{ formatDate(record.createTime) }} · {{ record.examType }}</p>
+                <p class="truncate text-sm font-medium text-[#475569] dark:text-gray-300">{{ record.studentName }} - {{ record.courseName }}</p>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">{{ formatDate(record.createTime) }} · {{ record.examType }}</p>
               </div>
-              <span class="ml-2 shrink-0 text-sm font-semibold text-[#0f172a]">{{ record.scoreValue }}</span>
+              <span class="ml-2 shrink-0 text-sm font-semibold text-[#0f172a] dark:text-white">{{ record.scoreValue }}</span>
             </div>
-            <div v-if="recentRecords.length === 0" class="py-8 text-center text-sm text-[#94a3b8]">
-              暂无数据
+            <div v-if="recentRecords.length === 0" class="py-8 text-center text-sm text-[#94a3b8] dark:text-gray-500">
+              {{ t('common.noData') }}
             </div>
           </div>
         </CardContent>
@@ -370,15 +373,15 @@ watch(selectedCourseId, () => {
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-[#0f172a]">单科成绩 TOP 5</h2>
+            <h2 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('ranking.subjectTop5') }}</h2>
             <select
               v-model="selectedCourseId"
-              class="h-7 rounded-md border border-[#e2e8f0] bg-white px-2 text-xs text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-7 rounded-md border border-[#e2e8f0] bg-white px-2 text-xs text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
-              <option :value="undefined">选择课程</option>
+              <option :value="undefined">{{ t('common.pleaseSelect') }}</option>
               <option v-for="c in courseOptions" :key="c.id" :value="c.id">
                 {{ c.courseName }}
               </option>
@@ -386,18 +389,18 @@ watch(selectedCourseId, () => {
           </div>
           <table class="w-full">
             <thead>
-              <tr class="border-b border-[#e2e8f0]">
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">排名</th>
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">姓名</th>
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">班级</th>
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">分数</th>
+              <tr class="border-b border-[#e2e8f0] dark:border-gray-700">
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('ranking.rank') }}</th>
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('student.name') }}</th>
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('student.class') }}</th>
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('score.score') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="student in top5Subject"
                 :key="student.rank"
-                class="border-b border-[#f8fafc] last:border-0"
+                class="border-b border-[#f8fafc] last:border-0 dark:border-gray-700"
               >
                 <td class="py-2.5">
                   <span
@@ -409,37 +412,37 @@ watch(selectedCourseId, () => {
                     {{ student.rank }}
                   </span>
                 </td>
-                <td class="py-2.5 text-sm font-medium text-[#475569]">{{ student.name }}</td>
-                <td class="py-2.5 text-sm text-[#64748b]">{{ student.className }}</td>
-                <td class="py-2.5 text-sm font-semibold text-[#0f172a]">{{ student.score }}</td>
+                <td class="py-2.5 text-sm font-medium text-[#475569] dark:text-gray-300">{{ student.name }}</td>
+                <td class="py-2.5 text-sm text-[#64748b] dark:text-gray-400">{{ student.className }}</td>
+                <td class="py-2.5 text-sm font-semibold text-[#0f172a] dark:text-white">{{ student.score }}</td>
               </tr>
             </tbody>
           </table>
-          <div v-if="top5Subject.length === 0" class="py-6 text-center text-sm text-[#94a3b8]">
-            请选择课程查看排名
+          <div v-if="top5Subject.length === 0" class="py-6 text-center text-sm text-[#94a3b8] dark:text-gray-500">
+            {{ t('ranking.selectCourse') }}
           </div>
         </CardContent>
       </Card>
 
-      <Card class="py-4">
+      <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
         <CardContent>
           <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-[#0f172a]">总分成绩 TOP 5</h2>
+            <h2 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('ranking.totalTop5') }}</h2>
           </div>
           <table class="w-full">
             <thead>
-              <tr class="border-b border-[#e2e8f0]">
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">排名</th>
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">姓名</th>
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">班级</th>
-                <th class="pb-2 text-left text-xs font-medium text-[#64748b]">总分</th>
+              <tr class="border-b border-[#e2e8f0] dark:border-gray-700">
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('ranking.rank') }}</th>
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('student.name') }}</th>
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('student.class') }}</th>
+                <th class="pb-2 text-left text-xs font-medium text-[#64748b] dark:text-gray-400">{{ t('score.score') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="student in top5Total"
                 :key="student.rank"
-                class="border-b border-[#f8fafc] last:border-0"
+                class="border-b border-[#f8fafc] last:border-0 dark:border-gray-700"
               >
                 <td class="py-2.5">
                   <span
@@ -451,37 +454,37 @@ watch(selectedCourseId, () => {
                     {{ student.rank }}
                   </span>
                 </td>
-                <td class="py-2.5 text-sm font-medium text-[#475569]">{{ student.name }}</td>
-                <td class="py-2.5 text-sm text-[#64748b]">{{ student.className }}</td>
-                <td class="py-2.5 text-sm font-semibold text-[#0f172a]">{{ student.score }}</td>
+                <td class="py-2.5 text-sm font-medium text-[#475569] dark:text-gray-300">{{ student.name }}</td>
+                <td class="py-2.5 text-sm text-[#64748b] dark:text-gray-400">{{ student.className }}</td>
+                <td class="py-2.5 text-sm font-semibold text-[#0f172a] dark:text-white">{{ student.score }}</td>
               </tr>
             </tbody>
           </table>
-          <div v-if="top5Total.length === 0" class="py-6 text-center text-sm text-[#94a3b8]">
-            暂无数据
+          <div v-if="top5Total.length === 0" class="py-6 text-center text-sm text-[#94a3b8] dark:text-gray-500">
+            {{ t('common.noData') }}
           </div>
         </CardContent>
       </Card>
     </div>
 
-    <Card class="py-4">
+    <Card class="py-4 dark:border-gray-700 dark:bg-gray-800">
       <CardContent>
         <div class="mb-3 flex items-center gap-2">
-          <AlertTriangle class="size-4 text-[#b45309]" />
-          <h2 class="text-sm font-semibold text-[#0f172a]">成绩预警</h2>
+          <AlertTriangle class="size-4 text-[#b45309] dark:text-orange-400" />
+          <h2 class="text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('warning.scoreWarning') }}</h2>
         </div>
         <div class="grid gap-4 grid-cols-2 lg:grid-cols-3">
           <div
             v-for="item in warningData"
             :key="item.type"
-            class="rounded-md border border-[#e2e8f0] p-3"
+            class="rounded-md border border-[#e2e8f0] p-3 dark:border-gray-700"
           >
-            <p class="text-xs text-[#64748b]">{{ item.type }}</p>
+            <p class="text-xs text-[#64748b] dark:text-gray-400">{{ item.type }}</p>
             <p :class="['mt-1 text-xl font-semibold', getWarningColor(item.type)]">{{ item.count }} 人</p>
           </div>
         </div>
-        <div v-if="warningData.length === 0" class="py-6 text-center text-sm text-[#94a3b8]">
-          暂无预警数据
+        <div v-if="warningData.length === 0" class="py-6 text-center text-sm text-[#94a3b8] dark:text-gray-500">
+          {{ t('common.noData') }}
         </div>
       </CardContent>
     </Card>

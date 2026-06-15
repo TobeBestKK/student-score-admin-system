@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   GraduationCap,
   LogOut,
@@ -11,8 +12,10 @@ import {
   Trophy,
   BookOpen,
   TrendingUp,
+  Settings,
 } from '@lucide/vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const sidebarCollapsed = ref(false)
@@ -23,20 +26,22 @@ const userInfo = computed(() => {
 })
 
 const currentTitle = computed(() => {
-  if (route.path.startsWith('/student/scores')) return '课程成绩'
-  if (route.path.startsWith('/student/trend')) return '成绩趋势'
-  if (route.path.startsWith('/student/warnings')) return '预警中心'
-  if (route.path.startsWith('/student/ranking')) return '我的排名'
-  return '学业概览'
+  if (route.path.startsWith('/student/scores')) return t('nav.scores')
+  if (route.path.startsWith('/student/trend')) return t('nav.trend')
+  if (route.path.startsWith('/student/warnings')) return t('nav.warnings')
+  if (route.path.startsWith('/student/ranking')) return t('nav.ranking')
+  if (route.path.startsWith('/student/settings')) return t('nav.settings')
+  return t('nav.overview')
 })
 
-const menuItems = [
-  { icon: BarChart3, label: '学业概览', path: '/student/overview' },
-  { icon: BookOpen, label: '课程成绩', path: '/student/scores' },
-  { icon: TrendingUp, label: '成绩趋势', path: '/student/trend' },
-  { icon: AlertTriangle, label: '预警中心', path: '/student/warnings' },
-  { icon: Trophy, label: '我的排名', path: '/student/ranking' },
-]
+const menuItems = computed(() => [
+  { icon: BarChart3, label: t('nav.overview'), path: '/student/overview' },
+  { icon: BookOpen, label: t('nav.scores'), path: '/student/scores' },
+  { icon: TrendingUp, label: t('nav.trend'), path: '/student/trend' },
+  { icon: AlertTriangle, label: t('nav.warnings'), path: '/student/warnings' },
+  { icon: Trophy, label: t('nav.ranking'), path: '/student/ranking' },
+  { icon: Settings, label: t('nav.settings'), path: '/student/settings' },
+])
 
 function isActive(path: string) {
   return route.path === path || route.path.startsWith(path + '/')
@@ -50,20 +55,20 @@ function handleLogout() {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-[#f5f8fb]">
+  <div class="flex min-h-screen bg-[#f5f8fb] dark:bg-gray-900">
     <aside
       :class="[
-        'flex flex-col border-r border-[#e2e8f0] bg-white transition-all duration-300',
+        'flex flex-col border-r border-[#e2e8f0] bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800',
         sidebarCollapsed ? 'w-[68px]' : 'w-[220px]',
       ]"
     >
-      <div class="flex h-14 items-center justify-between border-b border-[#e2e8f0] px-4">
+      <div class="flex h-14 items-center justify-between border-b border-[#e2e8f0] px-4 dark:border-gray-700">
         <div class="flex items-center gap-2.5">
-          <div class="grid size-8 shrink-0 place-items-center rounded-lg bg-[#155e75] text-white">
+          <div class="grid size-8 shrink-0 place-items-center rounded-lg bg-[#155e75] text-white dark:bg-teal-700">
             <GraduationCap class="size-4" />
           </div>
-          <span v-if="!sidebarCollapsed" class="text-sm font-semibold text-[#0f172a]">
-            学生成绩分析
+          <span v-if="!sidebarCollapsed" class="text-sm font-semibold text-[#0f172a] dark:text-white">
+            {{ t('login.title') }}
           </span>
         </div>
       </div>
@@ -76,8 +81,8 @@ function handleLogout() {
               :class="[
                 'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors',
                 isActive(item.path)
-                  ? 'bg-[#ccfbf1] text-[#0f766e]'
-                  : 'text-[#475569] hover:bg-[#f1f5f9] hover:text-[#0f172a]',
+                  ? 'bg-[#ccfbf1] text-[#0f766e] dark:bg-teal-900/50 dark:text-teal-300'
+                  : 'text-[#475569] hover:bg-[#f1f5f9] hover:text-[#0f172a] dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
               ]"
             >
               <component :is="item.icon" class="size-[18px] shrink-0" />
@@ -87,40 +92,40 @@ function handleLogout() {
         </ul>
       </nav>
 
-      <div class="border-t border-[#e2e8f0] p-2">
+      <div class="border-t border-[#e2e8f0] p-2 dark:border-gray-700">
         <button
-          class="flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#475569]"
+          class="flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#475569] dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           @click="sidebarCollapsed = !sidebarCollapsed"
         >
           <ChevronDown
             :class="['size-3.5 transition-transform', sidebarCollapsed ? '-rotate-90' : '']"
           />
-          <span v-if="!sidebarCollapsed">收起侧边栏</span>
+          <span v-if="!sidebarCollapsed">{{ t('common.close') }}</span>
         </button>
       </div>
     </aside>
 
     <div class="flex flex-1 flex-col">
-      <header class="flex h-14 items-center justify-between border-b border-[#e2e8f0] bg-white px-6">
+      <header class="flex h-14 items-center justify-between border-b border-[#e2e8f0] bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
         <div class="flex items-center gap-3">
-          <h1 class="text-base font-semibold text-[#0f172a]">{{ currentTitle }}</h1>
-          <span class="rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-xs font-medium text-[#155e75]">
-            学生端
+          <h1 class="text-base font-semibold text-[#0f172a] dark:text-white">{{ currentTitle }}</h1>
+          <span class="rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-xs font-medium text-[#155e75] dark:bg-teal-900/30 dark:text-teal-300">
+            {{ t('nav.studentPortal') }}
           </span>
         </div>
         <div class="flex items-center gap-4">
           <div v-if="userInfo" class="flex items-center gap-2">
-            <div class="grid size-7 place-items-center rounded-full bg-[#f1f5f9] text-[#64748b]">
+            <div class="grid size-7 place-items-center rounded-full bg-[#f1f5f9] text-[#64748b] dark:bg-gray-700 dark:text-gray-400">
               <User class="size-3.5" />
             </div>
-            <span class="text-sm text-[#475569]">{{ userInfo.name }}</span>
+            <span class="text-sm text-[#475569] dark:text-gray-300">{{ userInfo.name }}</span>
           </div>
           <button
-            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c] dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300"
             @click="handleLogout"
           >
             <LogOut class="size-3.5" />
-            <span>退出登录</span>
+            <span>{{ t('nav.logout') }}</span>
           </button>
         </div>
       </header>
