@@ -2,10 +2,6 @@
 import {
   AlertTriangle,
   BookOpen,
-  ChevronDown,
-  GraduationCap,
-  LogOut,
-  Settings,
   User,
   Users,
   Award,
@@ -14,7 +10,6 @@ import {
   XCircle,
 } from "@lucide/vue"
 import { ref, onMounted, watch, nextTick } from "vue"
-import { useRouter } from "vue-router"
 import * as echarts from "echarts"
 import {
   fetchCourseOptions,
@@ -34,9 +29,6 @@ import {
   type RecentRecord,
 } from "../../api/dashboard"
 
-const router = useRouter()
-const sidebarCollapsed = ref(false)
-
 const userInfo = ref<{
   name: string
   username: string
@@ -50,26 +42,6 @@ try {
   }
 } catch (e) {
   console.error("Failed to get user info", e)
-}
-
-function handleLogout() {
-  localStorage.removeItem("userInfo")
-  localStorage.removeItem("token")
-  router.push("/login")
-}
-
-const menuItems = ref([
-  { icon: BookOpen, label: "数据概览", active: true },
-  { icon: GraduationCap, label: "学生管理", active: false },
-  { icon: Users, label: "成绩管理", active: false },
-  { icon: BookOpen, label: "班级管理", active: false },
-  { icon: AlertTriangle, label: "成绩预警", active: false },
-  { icon: Settings, label: "系统设置", active: false },
-])
-
-function handleMenuClick(item: { label: string; active: boolean }) {
-  menuItems.value.forEach((m) => (m.active = false))
-  item.active = true
 }
 
 // ========== 数据状态 ==========
@@ -262,89 +234,10 @@ watch(selectedCourseId, () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-[#f5f8fb]">
-    <!-- 侧边栏 -->
-    <aside
-      :class="[
-        'flex flex-col border-r border-[#e2e8f0] bg-white transition-all duration-300',
-        sidebarCollapsed ? 'w-[68px]' : 'w-[220px]',
-      ]"
-    >
-      <div class="flex h-14 items-center justify-between border-b border-[#e2e8f0] px-4">
-        <div class="flex items-center gap-2.5">
-          <div class="grid size-8 shrink-0 place-items-center rounded-lg bg-[#155e75] text-white">
-            <GraduationCap class="size-4" />
-          </div>
-          <span v-if="!sidebarCollapsed" class="text-sm font-semibold text-[#0f172a]">
-            成绩分析系统
-          </span>
-        </div>
-      </div>
-
-      <nav class="flex-1 overflow-y-auto px-3 py-3">
-        <ul class="space-y-0.5">
-          <li v-for="item in menuItems" :key="item.label">
-            <button
-              :class="[
-                'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors',
-                item.active
-                  ? 'bg-[#ccfbf1] text-[#0f766e]'
-                  : 'text-[#475569] hover:bg-[#f1f5f9] hover:text-[#0f172a]',
-              ]"
-              @click="handleMenuClick(item)"
-            >
-              <component :is="item.icon" class="size-[18px] shrink-0" />
-              <span v-if="!sidebarCollapsed">{{ item.label }}</span>
-            </button>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="border-t border-[#e2e8f0] p-2">
-        <button
-          class="flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#475569]"
-          @click="sidebarCollapsed = !sidebarCollapsed"
-        >
-          <ChevronDown
-            :class="['size-3.5 transition-transform', sidebarCollapsed ? '-rotate-90' : '']"
-          />
-          <span v-if="!sidebarCollapsed">收起侧边栏</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- 主内容 -->
-    <div class="flex flex-1 flex-col">
-      <!-- 顶部栏 -->
-      <header class="flex h-14 items-center justify-between border-b border-[#e2e8f0] bg-white px-6">
-        <div class="flex items-center gap-3">
-          <h1 class="text-base font-semibold text-[#0f172a]">数据概览</h1>
-          <span class="rounded-full bg-[#ccfbf1] px-2.5 py-0.5 text-xs font-medium text-[#0f766e]">
-            教师端
-          </span>
-        </div>
-        <div class="flex items-center gap-4">
-          <div v-if="userInfo" class="flex items-center gap-2">
-            <div class="grid size-7 place-items-center rounded-full bg-[#f1f5f9] text-[#64748b]">
-              <User class="size-3.5" />
-            </div>
-            <span class="text-sm text-[#475569]">{{ userInfo.name }}</span>
-          </div>
-          <button
-            class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
-            @click="handleLogout"
-          >
-            <LogOut class="size-3.5" />
-            <span>退出登录</span>
-          </button>
-        </div>
-      </header>
-
-      <!-- 页面内容 -->
-      <main class="flex-1 overflow-y-auto p-6">
-        <!-- 学期筛选 -->
-        <div class="mb-6 flex items-center gap-3">
-          <label class="text-sm font-medium text-[#475569]">学期筛选</label>
+  <div>
+    <!-- 学期筛选 -->
+    <div class="mb-6 flex items-center gap-3">
+      <label class="text-sm font-medium text-[#475569]">学期筛选</label>
           <select
             v-model="selectedSemester"
             class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
@@ -586,7 +479,7 @@ watch(selectedCourseId, () => {
             暂无预警数据
           </div>
         </div>
-      </main>
+      </div>
     </div>
   </div>
 </template>
