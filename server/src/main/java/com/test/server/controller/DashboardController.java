@@ -91,8 +91,12 @@ public class DashboardController {
     }
 
     @GetMapping("/student/trend")
-    public ResponseEntity<ScoreTrendDTO> getScoreTrend(@RequestParam Long studentId) {
-        return ResponseEntity.ok(dashboardService.getScoreTrend(studentId));
+    public ResponseEntity<ScoreTrendDTO> getScoreTrend(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getScoreTrend(studentId, academicYear, semester, examType));
     }
 
     @GetMapping("/student/radar")
@@ -121,5 +125,14 @@ public class DashboardController {
             @RequestParam(required = false) String semester,
             @RequestParam(required = false) String examType) {
         return ResponseEntity.ok(dashboardService.getCourseRanking(courseName, academicYear, semester, examType));
+    }
+
+    @GetMapping("/student/trend-detail")
+    public ResponseEntity<ScoreTrendDetailDTO> getScoreTrendDetail(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester,
+            @RequestParam(required = false) String examType) {
+        return ResponseEntity.ok(dashboardService.getScoreTrendDetail(studentId, academicYear, semester, examType));
     }
 }

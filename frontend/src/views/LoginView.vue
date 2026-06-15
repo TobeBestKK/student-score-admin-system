@@ -168,11 +168,15 @@ async function handleSubmit() {
       localStorage.setItem("userInfo", JSON.stringify(response.userInfo))
       loginSuccess.value = true
 
-      setTimeout(() => {
-        if (activeRole.value === "student") {
-          router.push("/student-dashboard")
-        } else {
-          router.push("/dashboard")
+      setTimeout(async () => {
+        try {
+          if (activeRole.value === "student") {
+            await router.push("/student-dashboard")
+          } else {
+            await router.push("/dashboard")
+          }
+        } catch (e) {
+          console.error("Navigation failed:", e)
         }
       }, 1500)
     } else {
