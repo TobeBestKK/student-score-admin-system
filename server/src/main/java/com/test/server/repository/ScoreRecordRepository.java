@@ -156,6 +156,7 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
 
     @Query(value = "SELECT sr.* FROM score_record sr " +
             "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
+            "AND sr.exam_type IN ('期中', '期末') " +
             "ORDER BY sr.create_time DESC",
             nativeQuery = true)
     List<ScoreRecord> findByStudentIdAllSemesters(@Param("studentId") Long studentId);
@@ -317,6 +318,137 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
             nativeQuery = true)
     List<Object[]> findCourseRanking(
             @Param("courseName") String courseName,
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
+
+    // ========== 成绩管理查询 ==========
+
+    @Query(value = "SELECT sr.id, sr.student_id, s.name AS student_name, s.student_no, " +
+            "ci.class_name, sr.course_id, co.course_name, sr.score_value, sr.exam_type, " +
+            "sr.remark, sr.create_time " +
+            "FROM score_record sr " +
+            "JOIN student s ON sr.student_id = s.id " +
+            "JOIN class_info ci ON s.class_id = ci.id " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.is_deleted = 0 " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:courseId IS NULL OR sr.course_id = :courseId) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "AND (:keyword IS NULL OR :keyword = '' OR s.name LIKE CONCAT('%', :keyword, '%') OR s.student_no LIKE CONCAT('%', :keyword, '%')) " +
+            "ORDER BY sr.create_time DESC",
+            countQuery = "SELECT COUNT(*) " +
+                    "FROM score_record sr " +
+                    "JOIN student s ON sr.student_id = s.id " +
+                    "JOIN course co ON sr.course_id = co.id " +
+                    "WHERE sr.is_deleted = 0 " +
+                    "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+                    "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+                    "AND (:courseId IS NULL OR sr.course_id = :courseId) " +
+                    "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+                    "AND (:keyword IS NULL OR :keyword = '' OR s.name LIKE CONCAT('%', :keyword, '%') OR s.student_no LIKE CONCAT('%', :keyword, '%'))",
+            nativeQuery = true)
+    org.springframework.data.domain.Page<Object[]> findScoreRecordsWithFilters(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType,
+            @Param("keyword") String keyword,
+            org.springframework.data.domain.Pageable pageable);
+
+    @Query(value = "SELECT COUNT(*) FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.is_deleted = 0 " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:courseId IS NULL OR sr.course_id = :courseId) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType)",
+            nativeQuery = true)
+    long countScoreRecordsWithFilters(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT AVG(sr.score_value) FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.is_deleted = 0 " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:courseId IS NULL OR sr.course_id = :courseId) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType)",
+            nativeQuery = true)
+    BigDecimal avgScoreRecordsWithFilters(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT COUNT(*) FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.is_deleted = 0 AND sr.score_value >= 60 " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:courseId IS NULL OR sr.course_id = :courseId) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType)",
+            nativeQuery = true)
+    long countPassingWithFilters(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT COUNT(*) FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.is_deleted = 0 AND sr.score_value < 60 " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:courseId IS NULL OR sr.course_id = :courseId) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType)",
+            nativeQuery = true)
+    long countFailingWithFilters(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("courseId") Long courseId,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT sr.*, co.course_name, co.academic_year, co.semester " +
+            "FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
+            "AND sr.exam_type IN ('期中', '期末') " +
+            "ORDER BY co.academic_year, co.semester, sr.exam_type, co.course_name",
+            nativeQuery = true)
+    List<ScoreRecord> findByStudentIdOrderedByTime(@Param("studentId") Long studentId);
+
+    @Query(value = "SELECT sr.* FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
+            "AND sr.exam_type IN ('期中', '期末') " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "ORDER BY sr.create_time DESC",
+            nativeQuery = true)
+    List<ScoreRecord> findByStudentIdWithFilters(
+            @Param("studentId") Long studentId,
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester,
+            @Param("examType") String examType);
+
+    @Query(value = "SELECT sr.*, co.course_name, co.academic_year, co.semester " +
+            "FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
+            "AND sr.exam_type IN ('期中', '期末') " +
+            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
+            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
+            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "ORDER BY co.academic_year, co.semester, sr.exam_type, co.course_name",
+            nativeQuery = true)
+    List<ScoreRecord> findByStudentIdOrderedWithFilters(
+            @Param("studentId") Long studentId,
             @Param("academicYear") String academicYear,
             @Param("semester") String semester,
             @Param("examType") String examType);
