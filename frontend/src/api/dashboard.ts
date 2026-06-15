@@ -149,8 +149,8 @@ export function fetchStudentStats(params: {
   return api.get('/dashboard/student/stats', { params })
 }
 
-export function fetchScoreTrend(studentId: number): Promise<ScoreTrend> {
-  return api.get('/dashboard/student/trend', { params: { studentId } })
+export function fetchScoreTrend(studentId: number, academicYear?: string, semester?: string, examType?: string): Promise<ScoreTrend> {
+  return api.get('/dashboard/student/trend', { params: { studentId, academicYear, semester, examType } })
 }
 
 export interface RadarChart {
@@ -209,4 +209,40 @@ export function fetchCourseRanking(params: {
   examType?: string
 }): Promise<CourseRank[]> {
   return api.get('/dashboard/student/course-ranking', { params })
+}
+
+// ========== 成绩趋势对比 ==========
+
+export interface ExamScore {
+  examLabel: string
+  academicYear: string
+  semester: string
+  examType: string
+  score: number
+  classAvg: number
+  gradeAvg: number
+}
+
+export interface CourseTrendItem {
+  courseName: string
+  exams: ExamScore[]
+  latestChange: number
+  trendDirection: string
+}
+
+export interface SemesterSummary {
+  label: string
+  totalScore: number
+  classAvgTotal: number
+  gradeAvgTotal: number
+  courseCount: number
+}
+
+export interface ScoreTrendDetail {
+  courseTrends: CourseTrendItem[]
+  semesterSummaries: SemesterSummary[]
+}
+
+export function fetchScoreTrendDetail(studentId: number, academicYear?: string, semester?: string, examType?: string): Promise<ScoreTrendDetail> {
+  return api.get('/dashboard/student/trend-detail', { params: { studentId, academicYear, semester, examType } })
 }

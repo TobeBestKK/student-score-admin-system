@@ -306,8 +306,8 @@ public class DashboardService {
         );
     }
 
-    public ScoreTrendDTO getScoreTrend(Long studentId) {
-        List<ScoreRecord> records = scoreRecordRepository.findByStudentIdAllSemesters(studentId);
+    public ScoreTrendDTO getScoreTrend(Long studentId, String academicYear, String semester, String examType) {
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentIdWithFilters(studentId, academicYear, semester, examType);
 
         List<String> labels = new ArrayList<>();
         List<BigDecimal> studentScores = new ArrayList<>();
@@ -403,5 +403,98 @@ public class DashboardService {
         }
 
         return result;
+    }
+
+    // ========== 成绩趋势对比 ==========
+
+    public ScoreTrendDetailDTO getScoreTrendDetail(Long studentId, String academicYear, String semester, String examType) {
+        List<ScoreRecord> allRecords = scoreRecordRepository.findByStudentIdOrderedWithFilters(studentId, academicYear, semester, examType);
+
+        // 按课程分组
+        Map<String, List<ScoreRecord>> byCourse = new LinkedHashMap<>();
+        for (ScoreRecord r : allRecords) {
+            String courseName = r.getCourse().getCourseName();
+            byCourse.computeIfAbsent(courseName, k -> new ArrayList<>()).add(r);
+        }
+
+        // 构建各科趋势
+        List<ScoreTrendDetailDTO.CourseTrendItem> courseTrends = new ArrayList<>();
+        for (Map.Entry<String, List<ScoreRecord>> entry : byCourse.entrySet()) {
+            String courseName = entry.getKey();
+            List<ScoreRecord> records = entry.getValue();
+
+            List<ScoreTrendDetailDTO.ExamScore> exams = new ArrayList<>();
+            for (ScoreRecord r : records) {
+                Course c = r.getCourse();
+                String label = c.getAcademicYear() + " " + c.getSemester() + " " + r.getExamType();
+
+                List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, r.getCourseId(), r.getExamType());
+                Object[] avgs = avgList.isEmpty() ? new Object[]{null, null} : avgList.get(0);
+                BigDecimal classAvg = avgs[0] != null ? ((BigDecimal) avgs[0]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+                BigDecimal gradeAvg = avgs[1] != null ? ((BigDecimal) avgs[1]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+
+                exams.add(new ScoreTrendDetailDTO.ExamScore(
+                        label, c.getAcademicYear(), c.getSemester(), r.getExamType(),
+                        r.getScoreValue(), classAvg, gradeAvg));
+            }
+
+            BigDecimal latestChange = BigDecimal.ZERO;
+            String trendDirection = "持平";
+            if (exams.size() >= 2) {
+                BigDecimal latest = exams.get(exams.size() - 1).getScore();
+                BigDecimal previous = exams.get(exams.size() - 2).getScore();
+                latestChange = latest.subtract(previous).setScale(1, RoundingMode.HALF_UP);
+                if (latestChange.compareTo(BigDecimal.ZERO) > 0) {
+                    trendDirection = "上升";
+                } else if (latestChange.compareTo(BigDecimal.ZERO) < 0) {
+                    trendDirection = "下降";
+                }
+            }
+
+            courseTrends.add(new ScoreTrendDetailDTO.CourseTrendItem(
+                    courseName, exams, latestChange, trendDirection));
+        }
+
+        // 构建学期汇总
+        Map<String, List<ScoreRecord>> bySemester = new LinkedHashMap<>();
+        for (ScoreRecord r : allRecords) {
+            Course c = r.getCourse();
+            String key = c.getAcademicYear() + " " + c.getSemester() + " " + r.getExamType();
+            bySemester.computeIfAbsent(key, k -> new ArrayList<>()).add(r);
+        }
+
+        List<ScoreTrendDetailDTO.SemesterSummary> semesterSummaries = new ArrayList<>();
+        for (Map.Entry<String, List<ScoreRecord>> entry : bySemester.entrySet()) {
+            BigDecimal total = BigDecimal.ZERO;
+            for (ScoreRecord r : entry.getValue()) {
+                total = total.add(r.getScoreValue());
+            }
+            BigDecimal avg = entry.getValue().size() > 0
+                    ? total.divide(BigDecimal.valueOf(entry.getValue().size()), 1, RoundingMode.HALF_UP)
+                    : BigDecimal.ZERO;
+
+            // 计算班级和年级平均总分
+            BigDecimal classAvgTotal = BigDecimal.ZERO;
+            BigDecimal gradeAvgTotal = BigDecimal.ZERO;
+            int count = 0;
+            for (ScoreRecord r : entry.getValue()) {
+                List<Object[]> avgs = scoreRecordRepository.findCourseAverages(studentId, r.getCourseId(), r.getExamType());
+                if (!avgs.isEmpty()) {
+                    Object[] avgArr = avgs.get(0);
+                    if (avgArr[0] != null) classAvgTotal = classAvgTotal.add((BigDecimal) avgArr[0]);
+                    if (avgArr[1] != null) gradeAvgTotal = gradeAvgTotal.add((BigDecimal) avgArr[1]);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                classAvgTotal = classAvgTotal.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP);
+                gradeAvgTotal = gradeAvgTotal.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP);
+            }
+
+            semesterSummaries.add(new ScoreTrendDetailDTO.SemesterSummary(
+                    entry.getKey(), total, classAvgTotal, gradeAvgTotal, entry.getValue().size()));
+        }
+
+        return new ScoreTrendDetailDTO(courseTrends, semesterSummaries);
     }
 }
