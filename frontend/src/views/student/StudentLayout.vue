@@ -11,7 +11,6 @@ import {
   Trophy,
   BookOpen,
   TrendingUp,
-  Target,
 } from '@lucide/vue'
 
 const router = useRouter()
@@ -28,7 +27,6 @@ const currentTitle = computed(() => {
   if (route.path.startsWith('/student/trend')) return '成绩趋势'
   if (route.path.startsWith('/student/warnings')) return '预警中心'
   if (route.path.startsWith('/student/ranking')) return '我的排名'
-  if (route.path.startsWith('/student/credits')) return '学分统计'
   return '学业概览'
 })
 
@@ -38,7 +36,6 @@ const menuItems = [
   { icon: TrendingUp, label: '成绩趋势', path: '/student/trend' },
   { icon: AlertTriangle, label: '预警中心', path: '/student/warnings' },
   { icon: Trophy, label: '我的排名', path: '/student/ranking' },
-  { icon: Target, label: '学分统计', path: '/student/credits' },
 ]
 
 function isActive(path: string) {

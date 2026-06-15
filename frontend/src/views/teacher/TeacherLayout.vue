@@ -9,8 +9,7 @@ import {
   Users,
   AlertTriangle,
   ChevronDown,
-  Settings,
-  Award,
+  FileText,
 } from '@lucide/vue'
 
 const router = useRouter()
@@ -24,21 +23,19 @@ const userInfo = computed(() => {
 
 const currentTitle = computed(() => {
   const path = route.path
+  if (path.startsWith('/teacher/classes')) return '班级管理'
   if (path.startsWith('/teacher/students')) return '学生管理'
   if (path.startsWith('/teacher/scores')) return '成绩管理'
-  if (path.startsWith('/teacher/classes')) return '班级管理'
-  if (path.startsWith('/teacher/warnings')) return '成绩预警'
-  if (path.startsWith('/teacher/settings')) return '系统设置'
+  if (path.startsWith('/teacher/warnings')) return '预警中心'
   return '数据概览'
 })
 
 const menuItems = [
   { icon: BookOpen, label: '数据概览', path: '/teacher/overview' },
-  { icon: User, label: '学生管理', path: '/teacher/students' },
-  { icon: Award, label: '成绩管理', path: '/teacher/scores' },
   { icon: Users, label: '班级管理', path: '/teacher/classes' },
+  { icon: User, label: '学生管理', path: '/teacher/students' },
+  { icon: FileText, label: '成绩管理', path: '/teacher/scores' },
   { icon: AlertTriangle, label: '成绩预警', path: '/teacher/warnings' },
-  { icon: Settings, label: '系统设置', path: '/teacher/settings' },
 ]
 
 function isActive(path: string) {
@@ -56,7 +53,7 @@ function handleLogout() {
   <div class="flex min-h-screen bg-[#f5f8fb]">
     <aside
       :class="[
-        'flex flex-col border-r border-[#e2e8f0] bg-white transition-all duration-300',
+        'shrink-0 flex flex-col border-r border-[#e2e8f0] bg-white transition-all duration-300',
         sidebarCollapsed ? 'w-[68px]' : 'w-[220px]',
       ]"
     >
