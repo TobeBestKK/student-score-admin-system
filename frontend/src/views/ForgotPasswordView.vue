@@ -15,6 +15,7 @@ import {
 } from "@lucide/vue"
 import { computed, reactive, ref } from "vue"
 import { RouterLink } from "vue-router"
+import { useI18n } from "vue-i18n"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+const { t } = useI18n()
 
 type Role = "student" | "teacher"
 type Step = 1 | 2 | 3 | 4
@@ -73,24 +76,24 @@ const errors = reactive({
 const roleConfig = computed(() =>
   activeRole.value === "student"
     ? {
-        accountLabel: "学号",
-        accountPlaceholder: "请输入学号",
-        contactLabel: "邮箱或手机号",
-        contactPlaceholder: "请输入绑定的邮箱或手机号",
+        accountLabel: t('student.studentId'),
+        accountPlaceholder: t('common.pleaseInput') + t('student.studentId'),
+        contactLabel: t('forgotPassword.email'),
+        contactPlaceholder: t('common.pleaseInput') + t('forgotPassword.email'),
       }
     : {
-        accountLabel: "工号",
-        accountPlaceholder: "请输入工号",
-        contactLabel: "邮箱或手机号",
-        contactPlaceholder: "请输入绑定的邮箱或手机号",
+        accountLabel: t('teacher.teacherId'),
+        accountPlaceholder: t('common.pleaseInput') + t('teacher.teacherId'),
+        contactLabel: t('forgotPassword.email'),
+        contactPlaceholder: t('common.pleaseInput') + t('forgotPassword.email'),
       },
 )
 
-const steps = [
-  { number: 1, label: "身份验证" },
-  { number: 2, label: "验证码" },
-  { number: 3, label: "新密码" },
-]
+const steps = computed(() => [
+  { number: 1, label: t('settings.security') },
+  { number: 2, label: t('forgotPassword.email') },
+  { number: 3, label: t('settings.newPassword') },
+])
 
 function clearErrors() {
   errors.accountId = ""
@@ -105,12 +108,12 @@ function validateStep1(): boolean {
   let valid = true
 
   if (!form.accountId.trim()) {
-    errors.accountId = activeRole.value === "student" ? "请输入学号" : "请输入工号"
+    errors.accountId = activeRole.value === "student" ? t('forgotPassword.usernameRequired') : t('forgotPassword.usernameRequired')
     valid = false
   }
 
   if (!form.contact.trim()) {
-    errors.contact = "请输入邮箱或手机号"
+    errors.contact = t('forgotPassword.emailRequired')
     valid = false
   }
 
@@ -121,12 +124,12 @@ function validateStep2(): boolean {
   clearErrors()
 
   if (!form.verificationCode.trim()) {
-    errors.verificationCode = "请输入验证码"
+    errors.verificationCode = t('common.pleaseInput')
     return false
   }
 
   if (form.verificationCode.length !== 6) {
-    errors.verificationCode = "验证码为6位数字"
+    errors.verificationCode = "6位数字"
     return false
   }
 
@@ -138,18 +141,18 @@ function validateStep3(): boolean {
   let valid = true
 
   if (!form.newPassword.trim()) {
-    errors.newPassword = "请输入新密码"
+    errors.newPassword = t('common.pleaseInput') + t('login.password')
     valid = false
   } else if (form.newPassword.length < 6) {
-    errors.newPassword = "密码长度不能少于6位"
+    errors.newPassword = t('settings.passwordMinLength')
     valid = false
   }
 
   if (!form.confirmPassword.trim()) {
-    errors.confirmPassword = "请确认新密码"
+    errors.confirmPassword = t('common.pleaseInput')
     valid = false
   } else if (form.newPassword !== form.confirmPassword) {
-    errors.confirmPassword = "两次输入的密码不一致"
+    errors.confirmPassword = t('settings.passwordMismatch')
     valid = false
   }
 
@@ -197,45 +200,45 @@ function handleBack() {
 </script>
 
 <template>
-  <main class="portal-login-page relative min-h-screen overflow-hidden bg-[#f5f8fb] text-slate-900">
+  <main class="portal-login-page relative min-h-screen overflow-hidden bg-[#f5f8fb] text-slate-900 dark:bg-gray-900 dark:text-slate-100">
     <div class="pointer-events-none absolute inset-0">
-      <div class="absolute inset-0 bg-[linear-gradient(rgba(20,83,111,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(20,83,111,0.055)_1px,transparent_1px)] bg-[size:44px_44px]" />
-      <div class="absolute inset-x-0 bottom-0 h-64 bg-[linear-gradient(180deg,rgba(245,248,251,0),rgba(219,234,240,0.76))]" />
-      <svg class="absolute left-1/2 top-24 h-56 w-[760px] -translate-x-1/2 text-teal-800/10" viewBox="0 0 760 220" fill="none" aria-hidden="true">
+      <div class="absolute inset-0 bg-[linear-gradient(rgba(20,83,111,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(20,83,111,0.055)_1px,transparent_1px)] bg-[size:44px_44px] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" />
+      <div class="absolute inset-x-0 bottom-0 h-64 bg-[linear-gradient(180deg,rgba(245,248,251,0),rgba(219,234,240,0.76))] dark:bg-[linear-gradient(180deg,rgba(17,24,39,0),rgba(31,41,55,0.76))]" />
+      <svg class="absolute left-1/2 top-24 h-56 w-[760px] -translate-x-1/2 text-teal-800/10 dark:text-teal-100/10" viewBox="0 0 760 220" fill="none" aria-hidden="true">
         <path d="M28 162C96 110 146 126 206 86C268 45 314 104 380 72C451 38 496 84 548 62C612 35 668 56 732 30" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
         <path d="M44 184C132 142 196 168 266 124C333 82 380 132 450 98C520 66 574 112 704 76" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="8 14" />
       </svg>
-      <div class="campus-silhouette absolute inset-x-0 bottom-0 h-32 opacity-60" />
+      <div class="campus-silhouette absolute inset-x-0 bottom-0 h-32 opacity-60 dark:opacity-30" />
     </div>
 
     <header class="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
       <div class="flex items-center gap-3">
-        <div class="grid size-10 place-items-center rounded-lg bg-[#155e75] text-white shadow-sm">
+        <div class="grid size-10 place-items-center rounded-lg bg-[#155e75] text-white shadow-sm dark:bg-teal-700">
           <Landmark class="size-5" />
         </div>
         <div>
-          <p class="text-base font-semibold text-slate-950">学生成绩分析教务系统</p>
-          <p class="text-xs text-slate-500">Academic Affairs Portal</p>
+          <p class="text-base font-semibold text-slate-950 dark:text-white">{{ t('login.title') }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('login.subtitle') }}</p>
         </div>
       </div>
-      <div class="hidden items-center gap-2 text-sm text-slate-500 sm:flex">
-        <Building2 class="size-4 text-[#0f766e]" />
-        账号服务
+      <div class="hidden items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:flex">
+        <Building2 class="size-4 text-[#0f766e] dark:text-teal-400" />
+        {{ t('settings.security') }}
       </div>
     </header>
 
     <section class="relative z-10 mx-auto flex min-h-[calc(100vh-144px)] w-full max-w-6xl items-center justify-center px-5 pb-16 pt-6 sm:px-8">
-      <Card class="w-full max-w-[430px] rounded-lg border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.12)]">
-        <CardHeader class="place-items-center space-y-3 border-b border-slate-100 px-7 pb-5 pt-7 text-center">
-          <div class="grid size-11 place-items-center rounded-lg bg-teal-50 text-[#0f766e]">
+      <Card class="w-full max-w-[430px] rounded-lg border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.12)] dark:border-gray-700 dark:bg-gray-800 dark:shadow-[0_18px_55px_rgba(0,0,0,0.3)]">
+        <CardHeader class="place-items-center space-y-3 border-b border-slate-100 dark:border-gray-700 px-7 pb-5 pt-7 text-center">
+          <div class="grid size-11 place-items-center rounded-lg bg-teal-50 dark:bg-teal-900/30 text-[#0f766e] dark:text-teal-400">
             <ShieldCheck class="size-5" />
           </div>
           <div>
-            <CardTitle class="font-display text-2xl font-semibold text-slate-950">
-              忘记密码
+            <CardTitle class="font-display text-2xl font-semibold text-slate-950 dark:text-white">
+              {{ t('forgotPassword.title') }}
             </CardTitle>
-            <CardDescription class="mt-2 text-sm leading-6 text-slate-500">
-              请按步骤重置您的账号密码
+            <CardDescription class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+              {{ t('forgotPassword.subtitle') }}
             </CardDescription>
           </div>
         </CardHeader>
@@ -249,8 +252,8 @@ function handleBack() {
                   class="flex size-7 items-center justify-center rounded-full text-xs font-medium transition-colors"
                   :class="[
                     currentStep >= step.number
-                      ? 'bg-[#155e75] text-white'
-                      : 'bg-slate-100 text-slate-400',
+                      ? 'bg-[#155e75] text-white dark:bg-teal-700'
+                      : 'bg-slate-100 text-slate-400 dark:bg-gray-700 dark:text-gray-500',
                   ]"
                 >
                   {{ step.number }}
@@ -258,7 +261,7 @@ function handleBack() {
                 <span
                   class="text-xs font-medium"
                   :class="[
-                    currentStep >= step.number ? 'text-slate-700' : 'text-slate-400',
+                    currentStep >= step.number ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-gray-500',
                   ]"
                 >
                   {{ step.label }}
@@ -268,7 +271,7 @@ function handleBack() {
                 v-if="index < steps.length - 1"
                 class="mx-1 h-px w-6"
                 :class="[
-                  currentStep > step.number ? 'bg-[#155e75]' : 'bg-slate-200',
+                  currentStep > step.number ? 'bg-[#155e75] dark:bg-teal-700' : 'bg-slate-200 dark:bg-gray-600',
                 ]"
               />
             </template>

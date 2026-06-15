@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import * as echarts from "echarts"
 import {
   TrendingUp,
@@ -20,6 +21,8 @@ import {
   type ScoreTrend,
   type ScoreTrendDetail,
 } from "@/api/dashboard"
+
+const { t } = useI18n()
 
 const userInfo = ref<{ id: number; name: string } | null>(null)
 try {
@@ -288,10 +291,10 @@ watch([selectedSemester, selectedExamType], () => {
     <!-- 筛选区 -->
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs text-[#475569]">学期</label>
+        <label class="text-xs text-[#475569] dark:text-gray-400">学期</label>
         <select
           v-model="selectedSemester"
-          class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+          class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
         >
           <option value="">全部学期</option>
           <option v-for="opt in semesterOptions" :key="opt.academicYear + '-' + opt.semester" :value="opt.academicYear + '-' + opt.semester">
@@ -300,10 +303,10 @@ watch([selectedSemester, selectedExamType], () => {
         </select>
       </div>
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs text-[#475569]">考试类型</label>
+        <label class="text-xs text-[#475569] dark:text-gray-400">考试类型</label>
         <select
           v-model="selectedExamType"
-          class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+          class="h-10 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
         >
           <option v-for="opt in examTypeOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
@@ -320,52 +323,52 @@ watch([selectedSemester, selectedExamType], () => {
     <template v-else>
       <!-- 结论层：统计卡片 -->
       <div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">最近平均分</p>
-              <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ stats?.averageScore ?? 0 }}</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">最近平均分</p>
+              <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ stats?.averageScore ?? 0 }}</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1]">
-              <BarChart3 class="size-5 text-[#0f766e]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1] dark:bg-teal-900">
+              <BarChart3 class="size-5 text-[#0f766e] dark:text-teal-400" />
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">班级排名</p>
-              <p class="mt-1 text-2xl font-semibold text-[#155e75]">
-                {{ stats?.classRank ?? 0 }}<span class="text-sm text-[#94a3b8]">/{{ stats?.classTotal ?? 0 }}</span>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">班级排名</p>
+              <p class="mt-1 text-2xl font-semibold text-[#155e75] dark:text-teal-400">
+                {{ stats?.classRank ?? 0 }}<span class="text-sm text-[#94a3b8] dark:text-gray-500">/{{ stats?.classTotal ?? 0 }}</span>
               </p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#e0f2fe]">
-              <Users class="size-5 text-[#155e75]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#e0f2fe] dark:bg-cyan-900">
+              <Users class="size-5 text-[#155e75] dark:text-cyan-400" />
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">进步科目</p>
-              <p class="mt-1 text-2xl font-semibold text-[#15803d]">{{ improvedCourses.length }} 门</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">进步科目</p>
+              <p class="mt-1 text-2xl font-semibold text-[#15803d] dark:text-green-400">{{ improvedCourses.length }} 门</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
-              <TrendingUp class="size-5 text-[#15803d]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4] dark:bg-green-900">
+              <TrendingUp class="size-5 text-[#15803d] dark:text-green-400" />
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-[#64748b]">退步科目</p>
-              <p class="mt-1 text-2xl font-semibold text-[#dc2626]">{{ declinedCourses.length }} 门</p>
+              <p class="text-sm text-[#64748b] dark:text-gray-400">退步科目</p>
+              <p class="mt-1 text-2xl font-semibold text-[#dc2626] dark:text-red-400">{{ declinedCourses.length }} 门</p>
             </div>
-            <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2]">
-              <TrendingDown class="size-5 text-[#dc2626]" />
+            <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2] dark:bg-red-900">
+              <TrendingDown class="size-5 text-[#dc2626] dark:text-red-400" />
             </div>
           </div>
         </div>
@@ -373,22 +376,22 @@ watch([selectedSemester, selectedExamType], () => {
 
       <!-- 进步/退步提示 -->
       <div class="grid gap-4 md:grid-cols-2">
-        <div v-if="bestImprovement && bestImprovement.latestChange > 0" class="rounded-lg border border-[#bbf7d0] bg-[#f0fdf4] p-4">
+        <div v-if="bestImprovement && bestImprovement.latestChange > 0" class="rounded-lg border border-[#bbf7d0] bg-[#f0fdf4] p-4 dark:border-green-700 dark:bg-green-900">
           <div class="flex items-center gap-2">
-            <ArrowUpRight class="size-5 text-[#15803d]" />
-            <span class="text-sm font-semibold text-[#15803d]">最大进步</span>
+            <ArrowUpRight class="size-5 text-[#15803d] dark:text-green-400" />
+            <span class="text-sm font-semibold text-[#15803d] dark:text-green-400">最大进步</span>
           </div>
-          <p class="mt-1 text-sm text-[#166534]">
+          <p class="mt-1 text-sm text-[#166534] dark:text-green-300">
             <span class="font-medium">{{ bestImprovement.courseName }}</span>
             进步 <span class="font-semibold">+{{ bestImprovement.latestChange }}</span> 分
           </p>
         </div>
-        <div v-if="worstDecline && worstDecline.latestChange < 0" class="rounded-lg border border-[#fecaca] bg-[#fef2f2] p-4">
+        <div v-if="worstDecline && worstDecline.latestChange < 0" class="rounded-lg border border-[#fecaca] bg-[#fef2f2] p-4 dark:border-red-700 dark:bg-red-900">
           <div class="flex items-center gap-2">
-            <ArrowDownRight class="size-5 text-[#dc2626]" />
-            <span class="text-sm font-semibold text-[#dc2626]">最大退步</span>
+            <ArrowDownRight class="size-5 text-[#dc2626] dark:text-red-400" />
+            <span class="text-sm font-semibold text-[#dc2626] dark:text-red-400">最大退步</span>
           </div>
-          <p class="mt-1 text-sm text-[#991b1b]">
+          <p class="mt-1 text-sm text-[#991b1b] dark:text-red-300">
             <span class="font-medium">{{ worstDecline.courseName }}</span>
             退步 <span class="font-semibold">{{ worstDecline.latestChange }}</span> 分
           </p>
@@ -398,48 +401,48 @@ watch([selectedSemester, selectedExamType], () => {
       <!-- 趋势层：图表区 -->
       <div>
         <!-- 各科对比柱状图 -->
-        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
-          <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">各科成绩对比（期中 vs 期末）</h2>
+        <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">各科成绩对比（期中 vs 期末）</h2>
           <div v-if="trendDetail && trendDetail.courseTrends.length > 0" ref="barChartRef" class="h-80 w-full"></div>
           <div v-else class="flex h-80 items-center justify-center">
             <div class="text-center">
-              <BarChart3 class="mx-auto size-10 text-[#cbd5e1]" />
-              <p class="mt-2 text-sm text-[#64748b]">暂无对比数据</p>
+              <BarChart3 class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
+              <p class="mt-2 text-sm text-[#64748b] dark:text-gray-400">暂无对比数据</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 明细层：各科成绩变化表 -->
-      <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
-        <h2 class="mb-3 text-sm font-semibold text-[#0f172a]">各科成绩变化明细</h2>
-        <div v-if="trendDetail && trendDetail.courseTrends.length > 0" class="overflow-x-auto rounded-lg border border-[#e2e8f0]">
+      <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+        <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">各科成绩变化明细</h2>
+        <div v-if="trendDetail && trendDetail.courseTrends.length > 0" class="overflow-x-auto rounded-lg border border-[#e2e8f0] dark:border-gray-700">
           <table class="w-full">
             <thead>
-              <tr class="border-b border-[#e2e8f0] bg-[#f8fafc]">
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">课程</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">最近成绩</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">上次成绩</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">变化幅度</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">趋势</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">班级平均</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">年级平均</th>
+              <tr class="border-b border-[#e2e8f0] bg-[#f8fafc] dark:border-gray-700 dark:bg-gray-700">
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">课程</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">最近成绩</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">上次成绩</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">变化幅度</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">趋势</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">班级平均</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">年级平均</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="course in trendDetail.courseTrends"
                 :key="course.courseName"
-                class="border-b border-[#f1f5f9] last:border-0 hover:bg-[#f8fafc]"
+                class="border-b border-[#f1f5f9] last:border-0 hover:bg-[#f8fafc] dark:border-gray-700 dark:hover:bg-gray-700"
               >
-                <td class="px-4 py-3 text-sm font-medium text-[#0f172a]">{{ course.courseName }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-[#0f172a] dark:text-white">{{ course.courseName }}</td>
                 <td class="px-4 py-3">
-                  <span class="text-sm font-semibold text-[#0f172a]">
+                  <span class="text-sm font-semibold text-[#0f172a] dark:text-white">
                     {{ course.exams.length > 0 ? course.exams[course.exams.length - 1].score : '—' }}
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="text-sm text-[#475569]">
+                  <span class="text-sm text-[#475569] dark:text-gray-400">
                     {{ course.exams.length >= 2 ? course.exams[course.exams.length - 2].score : '—' }}
                   </span>
                 </td>
@@ -448,9 +451,9 @@ watch([selectedSemester, selectedExamType], () => {
                     v-if="course.exams.length >= 2"
                     :class="[
                       'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-semibold',
-                      course.latestChange > 0 ? 'bg-[#dcfce7] text-[#15803d]' : '',
-                      course.latestChange < 0 ? 'bg-[#fef2f2] text-[#dc2626]' : '',
-                      course.latestChange === 0 ? 'bg-[#f1f5f9] text-[#64748b]' : '',
+                      course.latestChange > 0 ? 'bg-[#dcfce7] text-[#15803d] dark:bg-green-900 dark:text-green-400' : '',
+                      course.latestChange < 0 ? 'bg-[#fef2f2] text-[#dc2626] dark:bg-red-900 dark:text-red-400' : '',
+                      course.latestChange === 0 ? 'bg-[#f1f5f9] text-[#64748b] dark:bg-gray-700 dark:text-gray-400' : '',
                     ]"
                   >
                     <ArrowUpRight v-if="course.latestChange > 0" class="size-3.5" />
@@ -458,15 +461,15 @@ watch([selectedSemester, selectedExamType], () => {
                     <Minus v-else class="size-3.5" />
                     {{ course.latestChange > 0 ? '+' : '' }}{{ course.latestChange }}
                   </span>
-                  <span v-else class="text-sm text-[#94a3b8]">—</span>
+                  <span v-else class="text-sm text-[#94a3b8] dark:text-gray-500">—</span>
                 </td>
                 <td class="px-4 py-3">
                   <span
                     :class="[
                       'inline-flex items-center gap-1 text-xs font-medium',
-                      course.trendDirection === '上升' ? 'text-[#15803d]' : '',
-                      course.trendDirection === '下降' ? 'text-[#dc2626]' : '',
-                      course.trendDirection === '持平' ? 'text-[#64748b]' : '',
+                      course.trendDirection === '上升' ? 'text-[#15803d] dark:text-green-400' : '',
+                      course.trendDirection === '下降' ? 'text-[#dc2626] dark:text-red-400' : '',
+                      course.trendDirection === '持平' ? 'text-[#64748b] dark:text-gray-400' : '',
                     ]"
                   >
                     <TrendingUp v-if="course.trendDirection === '上升'" class="size-3.5" />
@@ -475,17 +478,17 @@ watch([selectedSemester, selectedExamType], () => {
                     {{ course.trendDirection }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-sm text-[#475569]">
+                <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">
                   {{ course.exams.length > 0 ? course.exams[course.exams.length - 1].classAvg : '—' }}
                 </td>
-                <td class="px-4 py-3 text-sm text-[#475569]">
+                <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">
                   {{ course.exams.length > 0 ? course.exams[course.exams.length - 1].gradeAvg : '—' }}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div v-else class="py-12 text-center text-sm text-[#94a3b8]">
+        <div v-else class="py-12 text-center text-sm text-[#94a3b8] dark:text-gray-500">
           暂无成绩变化数据
         </div>
       </div>

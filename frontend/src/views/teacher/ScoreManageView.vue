@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import { FileText, Search, Plus, Pencil, Trash2, X, BarChart3, CheckCircle, XCircle, Hash } from "@lucide/vue"
 import {
   fetchScoreRecords,
@@ -20,6 +21,8 @@ import CardTitle from "@/components/ui/card/CardTitle.vue"
 import Button from "@/components/ui/button/Button.vue"
 import Input from "@/components/ui/input/Input.vue"
 import Label from "@/components/ui/label/Label.vue"
+
+const { t } = useI18n()
 
 interface StudentOption {
   id: number
@@ -295,20 +298,20 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-6">
-    <Card>
+    <Card class="dark:border-gray-700 dark:bg-gray-800">
       <CardHeader>
-        <CardTitle class="flex items-center gap-2 text-base">
-          <FileText class="size-5 text-[#155e75]" />
+        <CardTitle class="flex items-center gap-2 text-base dark:text-white">
+          <FileText class="size-5 text-[#155e75] dark:text-teal-400" />
           成绩管理
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="mb-6 flex flex-wrap items-end gap-4">
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">学期</Label>
+            <Label class="text-xs dark:text-gray-400">学期</Label>
             <select
               v-model="selectedSemester"
-              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
               <option value="">全部学期</option>
               <option v-for="opt in semesterOptions" :key="opt.academicYear + '-' + opt.semester" :value="opt.academicYear + '-' + opt.semester">
@@ -318,10 +321,10 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">课程</Label>
+            <Label class="text-xs dark:text-gray-400">课程</Label>
             <select
               v-model="query.courseId"
-              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
               <option :value="undefined">全部课程</option>
               <option v-for="c in courseOptions" :key="c.id" :value="c.id">
@@ -331,10 +334,10 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">考试类型</Label>
+            <Label class="text-xs dark:text-gray-400">考试类型</Label>
             <select
               v-model="query.examType"
-              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
               <option v-for="opt in examTypeOptions" :key="opt.value" :value="opt.value">
                 {{ opt.label }}
@@ -343,102 +346,102 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">学生姓名/学号</Label>
-            <Input v-model="query.keyword" placeholder="输入姓名或学号" class="w-48" />
+            <Label class="text-xs dark:text-gray-400">学生姓名/学号</Label>
+            <Input v-model="query.keyword" placeholder="输入姓名或学号" class="w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" />
           </div>
 
-          <Button @click="handleSearch" class="bg-[#155e75] hover:bg-[#0e4a5e]">
+          <Button @click="handleSearch" class="bg-[#155e75] hover:bg-[#0e4a5e] dark:bg-teal-700 dark:hover:bg-teal-600">
             <Search class="mr-1.5 size-4" />
             查询
           </Button>
 
-          <Button @click="openCreateModal" class="bg-[#0f766e] hover:bg-[#0d5d57]">
+          <Button @click="openCreateModal" class="bg-[#0f766e] hover:bg-[#0d5d57] dark:bg-teal-800 dark:hover:bg-teal-700">
             <Plus class="mr-1.5 size-4" />
             录入成绩
           </Button>
         </div>
 
         <div class="mb-6 grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">总记录</p>
-                <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ stats.totalRecords }}</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">总记录</p>
+                <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ stats.totalRecords }}</p>
               </div>
-              <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1]">
-                <Hash class="size-5 text-[#0f766e]" />
+              <div class="grid size-10 place-items-center rounded-md bg-[#ccfbf1] dark:bg-teal-900">
+                <Hash class="size-5 text-[#0f766e] dark:text-teal-400" />
               </div>
             </div>
           </div>
 
-          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">平均分</p>
-                <p class="mt-1 text-2xl font-semibold text-[#0f172a]">{{ stats.averageScore }}</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">平均分</p>
+                <p class="mt-1 text-2xl font-semibold text-[#0f172a] dark:text-white">{{ stats.averageScore }}</p>
               </div>
-              <div class="grid size-10 place-items-center rounded-md bg-[#e0f2fe]">
-                <BarChart3 class="size-5 text-[#155e75]" />
+              <div class="grid size-10 place-items-center rounded-md bg-[#e0f2fe] dark:bg-cyan-900">
+                <BarChart3 class="size-5 text-[#155e75] dark:text-cyan-400" />
               </div>
             </div>
           </div>
 
-          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">及格率</p>
-                <p class="mt-1 text-2xl font-semibold text-[#15803d]">{{ stats.passRate }}%</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">及格率</p>
+                <p class="mt-1 text-2xl font-semibold text-[#15803d] dark:text-green-400">{{ stats.passRate }}%</p>
               </div>
-              <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4]">
-                <CheckCircle class="size-5 text-[#15803d]" />
+              <div class="grid size-10 place-items-center rounded-md bg-[#f0fdf4] dark:bg-green-900">
+                <CheckCircle class="size-5 text-[#15803d] dark:text-green-400" />
               </div>
             </div>
           </div>
 
-          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4">
+          <div class="rounded-lg border border-[#e2e8f0] bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-[#64748b]">不及格</p>
-                <p class="mt-1 text-2xl font-semibold text-[#dc2626]">{{ stats.failCount }}</p>
+                <p class="text-sm text-[#64748b] dark:text-gray-400">不及格</p>
+                <p class="mt-1 text-2xl font-semibold text-[#dc2626] dark:text-red-400">{{ stats.failCount }}</p>
               </div>
-              <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2]">
-                <XCircle class="size-5 text-[#dc2626]" />
+              <div class="grid size-10 place-items-center rounded-md bg-[#fef2f2] dark:bg-red-900">
+                <XCircle class="size-5 text-[#dc2626] dark:text-red-400" />
               </div>
             </div>
           </div>
         </div>
 
         <div v-if="loading" class="flex items-center justify-center py-16">
-          <div class="size-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#155e75]"></div>
+          <div class="size-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#155e75] dark:border-gray-600 dark:border-t-teal-500"></div>
         </div>
 
         <div v-else>
-          <div class="overflow-x-auto rounded-lg border border-[#e2e8f0]">
+          <div class="overflow-x-auto rounded-lg border border-[#e2e8f0] dark:border-gray-700">
             <table class="w-full">
               <thead>
-                <tr class="border-b border-[#e2e8f0] bg-[#f8fafc]">
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">学生姓名</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">学号</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">班级</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">课程</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">成绩</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">等级</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">考试类型</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">评语</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">录入时间</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">操作</th>
+                <tr class="border-b border-[#e2e8f0] bg-[#f8fafc] dark:border-gray-700 dark:bg-gray-700">
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">学生姓名</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">学号</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">班级</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">课程</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">成绩</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">等级</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">考试类型</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">评语</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">录入时间</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">操作</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   v-for="record in scoreList"
                   :key="record.id"
-                  class="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]"
+                  class="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc] dark:border-gray-700 dark:hover:bg-gray-700"
                 >
-                  <td class="px-4 py-3 text-sm font-medium text-[#0f172a]">{{ record.studentName }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ record.studentNo }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ record.className }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ record.courseName }}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-[#0f172a] dark:text-white">{{ record.studentName }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ record.studentNo }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ record.className }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ record.courseName }}</td>
                   <td class="px-4 py-3">
                     <span
                       :class="[
@@ -459,7 +462,7 @@ onMounted(async () => {
                       {{ record.grade }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ record.examType }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ record.examType }}</td>
                   <td class="px-4 py-3">
                     <span
                       v-if="record.remark"
@@ -470,21 +473,21 @@ onMounted(async () => {
                     >
                       {{ record.remark }}
                     </span>
-                    <span v-else class="text-xs text-[#94a3b8]">—</span>
+                    <span v-else class="text-xs text-[#94a3b8] dark:text-gray-500">—</span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-[#64748b]">{{ formatDate(record.createTime) }}</td>
+                  <td class="px-4 py-3 text-sm text-[#64748b] dark:text-gray-400">{{ formatDate(record.createTime) }}</td>
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                       <Button
                         @click="openEditModal(record)"
-                        class="h-7 bg-[#f1f5f9] px-2 text-xs text-[#475569] hover:bg-[#e2e8f0]"
+                        class="h-7 bg-[#f1f5f9] px-2 text-xs text-[#475569] hover:bg-[#e2e8f0] dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                       >
                         <Pencil class="mr-1 size-3" />
                         编辑
                       </Button>
                       <Button
                         @click="confirmDelete(record)"
-                        class="h-7 bg-[#fef2f2] px-2 text-xs text-[#dc2626] hover:bg-[#fee2e2]"
+                        class="h-7 bg-[#fef2f2] px-2 text-xs text-[#dc2626] hover:bg-[#fee2e2] dark:bg-red-900 dark:text-red-400 dark:hover:bg-red-800"
                       >
                         <Trash2 class="mr-1 size-3" />
                         删除
@@ -496,7 +499,7 @@ onMounted(async () => {
             </table>
           </div>
 
-          <div v-if="scoreList.length === 0" class="flex flex-col items-center justify-center py-16 text-[#94a3b8]">
+          <div v-if="scoreList.length === 0" class="flex flex-col items-center justify-center py-16 text-[#94a3b8] dark:text-gray-500">
             <FileText class="mb-2 size-10" />
             <p class="text-sm">暂无成绩数据</p>
           </div>
