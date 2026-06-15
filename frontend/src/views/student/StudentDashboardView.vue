@@ -663,6 +663,4 @@ watch(trendSelectedSeries, () => {
           </div>
         </div>
       </div>
-    </div>
-  </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { Search, Users, Plus, Pencil, Trash2, X } from "@lucide/vue"
 import {
   fetchStudents,
@@ -21,6 +22,8 @@ import CardTitle from "@/components/ui/card/CardTitle.vue"
 import Button from "@/components/ui/button/Button.vue"
 import Input from "@/components/ui/input/Input.vue"
 import Label from "@/components/ui/label/Label.vue"
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const studentList = ref<Student[]>([])
@@ -181,20 +184,20 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <Card>
+    <Card class="dark:border-gray-700 dark:bg-gray-800">
       <CardHeader>
-        <CardTitle class="flex items-center gap-2 text-base">
-          <Users class="size-5 text-[#155e75]" />
+        <CardTitle class="flex items-center gap-2 text-base dark:text-white">
+          <Users class="size-5 text-[#155e75] dark:text-teal-400" />
           学生管理
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div class="mb-6 flex flex-wrap items-end gap-4">
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">年级</Label>
+            <Label class="text-xs dark:text-gray-400">年级</Label>
             <select
               v-model="query.grade"
-              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
               <option :value="undefined">全部年级</option>
               <option v-for="g in gradeOptions" :key="g.value" :value="g.value">
@@ -204,10 +207,10 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">班级</Label>
+            <Label class="text-xs dark:text-gray-400">班级</Label>
             <select
               v-model="query.classId"
-              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
+              class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75] dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
             >
               <option :value="undefined">全部班级</option>
               <option v-for="c in filteredClassList" :key="c.id" :value="c.id">
@@ -217,65 +220,65 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs">姓名/学号</Label>
-            <Input v-model="query.keyword" placeholder="输入姓名或学号" class="w-48" />
+            <Label class="text-xs dark:text-gray-400">姓名/学号</Label>
+            <Input v-model="query.keyword" placeholder="输入姓名或学号" class="w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" />
           </div>
 
-          <Button @click="handleSearch" class="bg-[#155e75] hover:bg-[#0e4a5e]">
+          <Button @click="handleSearch" class="bg-[#155e75] hover:bg-[#0e4a5e] dark:bg-teal-700 dark:hover:bg-teal-600">
             <Search class="mr-1.5 size-4" />
             搜索
           </Button>
 
-          <Button @click="openCreateModal" class="bg-[#0f766e] hover:bg-[#0d5d57]">
+          <Button @click="openCreateModal" class="bg-[#0f766e] hover:bg-[#0d5d57] dark:bg-teal-800 dark:hover:bg-teal-700">
             <Plus class="mr-1.5 size-4" />
             添加学生
           </Button>
         </div>
 
         <div v-if="loading" class="flex items-center justify-center py-16">
-          <div class="size-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#155e75]"></div>
+          <div class="size-8 animate-spin rounded-full border-4 border-[#e2e8f0] border-t-[#155e75] dark:border-gray-600 dark:border-t-teal-500"></div>
         </div>
 
         <div v-else>
-          <div class="overflow-x-auto rounded-lg border border-[#e2e8f0]">
+          <div class="overflow-x-auto rounded-lg border border-[#e2e8f0] dark:border-gray-700">
             <table class="w-full">
               <thead>
-                <tr class="border-b border-[#e2e8f0] bg-[#f8fafc]">
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">学号</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">姓名</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">性别</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">班级</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">电话</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">邮箱</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">入学年份</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b]">操作</th>
+                <tr class="border-b border-[#e2e8f0] bg-[#f8fafc] dark:border-gray-700 dark:bg-gray-700">
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">学号</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">姓名</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">性别</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">班级</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">电话</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">邮箱</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">入学年份</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-[#64748b] dark:text-gray-300">操作</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   v-for="student in studentList"
                   :key="student.id"
-                  class="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]"
+                  class="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc] dark:border-gray-700 dark:hover:bg-gray-700"
                 >
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ student.studentNo }}</td>
-                  <td class="px-4 py-3 text-sm font-medium text-[#0f172a]">{{ student.name }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ getGenderName(student.gender) }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ student.className }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ student.phone || "-" }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ student.email || "-" }}</td>
-                  <td class="px-4 py-3 text-sm text-[#475569]">{{ student.enrollmentYear || "-" }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ student.studentNo }}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-[#0f172a] dark:text-white">{{ student.name }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ getGenderName(student.gender) }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ student.className }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ student.phone || "-" }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ student.email || "-" }}</td>
+                  <td class="px-4 py-3 text-sm text-[#475569] dark:text-gray-400">{{ student.enrollmentYear || "-" }}</td>
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                       <Button
                         @click="openEditModal(student)"
-                        class="h-7 bg-[#f1f5f9] px-2 text-xs text-[#475569] hover:bg-[#e2e8f0]"
+                        class="h-7 bg-[#f1f5f9] px-2 text-xs text-[#475569] hover:bg-[#e2e8f0] dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                       >
                         <Pencil class="mr-1 size-3" />
                         编辑
                       </Button>
                       <Button
                         @click="handleDelete(student)"
-                        class="h-7 bg-[#fef2f2] px-2 text-xs text-[#dc2626] hover:bg-[#fee2e2]"
+                        class="h-7 bg-[#fef2f2] px-2 text-xs text-[#dc2626] hover:bg-[#fee2e2] dark:bg-red-900 dark:text-red-400 dark:hover:bg-red-800"
                       >
                         <Trash2 class="mr-1 size-3" />
                         删除
@@ -287,7 +290,7 @@ onMounted(() => {
             </table>
           </div>
 
-          <div v-if="studentList.length === 0" class="flex flex-col items-center justify-center py-16 text-[#94a3b8]">
+          <div v-if="studentList.length === 0" class="flex flex-col items-center justify-center py-16 text-[#94a3b8] dark:text-gray-500">
             <Users class="mb-2 size-10" />
             <p class="text-sm">暂无学生数据</p>
           </div>
@@ -300,8 +303,8 @@ onMounted(() => {
               :class="[
                 'h-8 px-3 text-sm',
                 query.page === p - 1
-                  ? 'bg-[#155e75] text-white hover:bg-[#0e4a5e]'
-                  : 'bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0]',
+                  ? 'bg-[#155e75] text-white hover:bg-[#0e4a5e] dark:bg-teal-700 dark:hover:bg-teal-600'
+                  : 'bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0] dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
               ]"
             >
               {{ p }}

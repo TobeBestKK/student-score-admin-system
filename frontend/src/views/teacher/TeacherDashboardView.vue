@@ -479,7 +479,5 @@ watch(selectedCourseId, () => {
             暂无预警数据
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+      </div> 
 </template>

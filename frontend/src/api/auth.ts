@@ -24,6 +24,34 @@ export interface LoginResponse {
   userInfo: UserInfo
 }
 
+export interface ProfileResponse {
+  id: number
+  username: string
+  name: string
+  email: string
+  phone: string
+  position: string
+  studentId: string
+}
+
+export interface UpdateProfileRequest {
+  name?: string
+  phone?: string
+}
+
+export interface UpdateProfileResponse {
+  success: boolean
+  message: string
+}
+
 export async function login(request: LoginRequest): Promise<LoginResponse> {
   return api.post('/auth/login', request)
+}
+
+export async function getProfile(params: { userId?: number; studentId?: number; teacherId?: number; username?: string }): Promise<ProfileResponse> {
+  return api.get('/profile', { params })
+}
+
+export async function updateProfile(params: { studentId?: number; teacherId?: number }, request: UpdateProfileRequest): Promise<UpdateProfileResponse> {
+  return api.put('/profile', request, { params })
 }
