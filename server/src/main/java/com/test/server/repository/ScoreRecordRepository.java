@@ -104,9 +104,9 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
     @Query(value = "SELECT sr.* FROM score_record sr " +
             "JOIN course co ON sr.course_id = co.id " +
             "WHERE sr.student_id = :studentId AND sr.is_deleted = 0 " +
-            "AND (:academicYear IS NULL OR :academicYear = '' OR co.academic_year = :academicYear) " +
-            "AND (:semester IS NULL OR :semester = '' OR co.semester = :semester) " +
-            "AND (:examType IS NULL OR :examType = '' OR sr.exam_type = :examType) " +
+            "AND (COALESCE(:academicYear, '') = '' OR co.academic_year = :academicYear) " +
+            "AND (COALESCE(:semester, '') = '' OR co.semester = :semester) " +
+            "AND (COALESCE(:examType, '') = '' OR sr.exam_type = :examType) " +
             "ORDER BY co.academic_year DESC, co.semester, co.course_name",
             nativeQuery = true)
     List<ScoreRecord> findByStudentAndFilters(

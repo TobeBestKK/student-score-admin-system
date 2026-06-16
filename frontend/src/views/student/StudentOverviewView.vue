@@ -119,6 +119,7 @@ async function loadScoresAndStats() {
       fetchStudentStats(params),
       fetchRadarData(params),
     ])
+
     scores.value = scoresData
     stats.value = statsData
     radarData.value = radarDataRes
@@ -489,7 +490,7 @@ watch(trendSelectedSeries, () => {
         <div class="space-y-3">
           <div
             v-for="course in scores"
-            :key="course.courseId"
+            :key="course.id"
             class="flex items-center justify-between rounded-md border border-[#f1f5f9] p-3 dark:border-gray-700"
           >
             <div class="flex items-center gap-3">
@@ -503,8 +504,18 @@ watch(trendSelectedSeries, () => {
                 {{ course.scoreValue }}
               </div>
               <div>
-                <p class="text-sm font-medium text-[#475569] dark:text-gray-300">{{ course.courseName }}</p>
-                <p class="text-xs text-[#64748b] dark:text-gray-400">{{ course.examType }} · {{ course.credit }} {{ t('score.credit') }}</p>
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-medium text-[#475569] dark:text-gray-300">{{ course.courseName }}</p>
+                  <span :class="[
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                    course.examType === '期末'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                  ]">
+                    {{ course.examType }}
+                  </span>
+                </div>
+                <p class="text-xs text-[#64748b] dark:text-gray-400">{{ course.credit }} {{ t('score.credit') }}</p>
               </div>
             </div>
             <div class="flex items-center gap-4">

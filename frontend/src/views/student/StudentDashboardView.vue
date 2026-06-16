@@ -498,7 +498,7 @@ watch(trendSelectedSeries, () => {
             <div class="space-y-3">
               <div
                 v-for="course in scores"
-                :key="course.courseId"
+                :key="course.id"
                 class="flex items-center justify-between rounded-md border border-[#f1f5f9] p-3"
               >
                 <div class="flex items-center gap-3">
