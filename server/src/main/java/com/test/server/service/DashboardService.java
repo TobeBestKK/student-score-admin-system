@@ -90,6 +90,61 @@ public class DashboardService {
             );
         }
 
+        // 获取课程信息，判断是否为语文数英
+        Optional<Course> courseOpt = courseRepository.findById(courseId);
+        boolean isMajorCourse = courseOpt
+                .map(c -> isMajorCourse(c.getCourseName()))
+                .orElse(false);
+
+        if (isMajorCourse) {
+            return getMajorCourseDistribution(courseId);
+        } else {
+            return getOtherCourseDistribution(courseId);
+        }
+    }
+
+    private boolean isMajorCourse(String courseName) {
+        return courseName.contains("语文") || courseName.contains("数学") || courseName.contains("英语");
+    }
+
+    private ScoreDistributionDTO getMajorCourseDistribution(Long courseId) {
+        String[] allLabels = {"50-59", "60-69", "70-79", "80-89", "90-99", "100-109", "110-119", "120-129", "130-140"};
+        Map<String, Long> map = new LinkedHashMap<>();
+        for (String label : allLabels) {
+            map.put(label, 0L);
+        }
+
+        List<ScoreRecord> records = scoreRecordRepository.findByCourseId(courseId);
+        for (ScoreRecord record : records) {
+            if (record.getExamType() == null || !record.getExamType().equals("期末")) continue;
+            if (record.getIsDeleted() != null && record.getIsDeleted() == 1) continue;
+
+            int score = record.getScoreValue().intValue();
+            String label = getMajorCourseLabel(score);
+            if (label != null) {
+                map.merge(label, 1L, Long::sum);
+            }
+        }
+
+        return new ScoreDistributionDTO(
+                new ArrayList<>(map.keySet()),
+                new ArrayList<>(map.values())
+        );
+    }
+
+    private String getMajorCourseLabel(int score) {
+        if (score < 60) return "50-59";
+        if (score < 70) return "60-69";
+        if (score < 80) return "70-79";
+        if (score < 90) return "80-89";
+        if (score < 100) return "90-99";
+        if (score < 110) return "100-109";
+        if (score < 120) return "110-119";
+        if (score < 130) return "120-129";
+        return "130-140";
+    }
+
+    private ScoreDistributionDTO getOtherCourseDistribution(Long courseId) {
         List<Object[]> rows = scoreRecordRepository.findScoreDistributionByCourseId(courseId);
         String[] allLabels = {"0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-100"};
         Map<String, Long> map = new LinkedHashMap<>();

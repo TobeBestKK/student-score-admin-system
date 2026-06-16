@@ -206,5 +206,5 @@ CREATE TABLE score_record (
         ON DELETE RESTRICT,
 
     CONSTRAINT chk_score_value
-        CHECK (score_value >= 0 AND score_value <= 100)
+        CHECK (score_value >= 0 AND score_value <= 150)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='成绩表';
