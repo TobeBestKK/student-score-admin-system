@@ -172,8 +172,8 @@ export function fetchRadarData(params: {
 // ========== 年级排名类型 ==========
 
 export interface CourseScore {
-  name: string
-  score: number
+  courseName: string
+  scoreValue: number
 }
 
 export interface GradeTotalRank {

@@ -31,6 +31,7 @@ export default {
     email: '邮箱',
     query: '查询',
     enter: '录入',
+    viewMore: '查看更多',
   },
   login: {
     title: '学生成绩分析系统',
@@ -80,6 +81,7 @@ export default {
     scores: '课程成绩',
     trend: '成绩趋势',
     warnings: '预警中心',
+    teacherWarnings: '成绩预警',
     ranking: '我的排名',
     settings: '个人设置',
     logout: '退出登录',

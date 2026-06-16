@@ -31,6 +31,7 @@ export default {
     email: 'Email',
     query: 'Query',
     enter: 'Enter',
+    viewMore: 'View More',
   },
   login: {
     title: 'Student Score Analysis System',
@@ -80,6 +81,7 @@ export default {
     scores: 'Scores',
     trend: 'Score Trend',
     warnings: 'Warnings',
+    teacherWarnings: 'Score Warnings',
     ranking: 'Ranking',
     settings: 'Settings',
     logout: 'Logout',
