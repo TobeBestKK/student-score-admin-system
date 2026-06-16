@@ -105,7 +105,8 @@ async function loadSemesters() {
 
 async function loadCourses() {
   try {
-    courseOptions.value = await fetchCourseOptions()
+    const semesterParams = getSemesterParams()
+    courseOptions.value = await fetchCourseOptions(semesterParams)
   } catch (e) {
     console.error("Failed to load courses", e)
   }
@@ -293,6 +294,7 @@ function formatDate(dateStr: string) {
 
 watch(selectedSemester, () => {
   query.value.page = 0
+  loadCourses()
   loadScores()
 })
 

@@ -24,13 +24,24 @@ public class DashboardService {
     private final ScoreRecordRepository scoreRecordRepository;
     private final StudentRepository studentRepository;
 
-    public List<CourseOptionDTO> getCourseOptions() {
+    public List<CourseOptionDTO> getCourseOptions(String academicYear, String semester) {
         List<Course> courses = courseRepository.findAll();
-        List<CourseOptionDTO> options = new ArrayList<>();
-        for (Course c : courses) {
-            options.add(new CourseOptionDTO(c.getId(), c.getCourseName()));
+
+        // 按学期过滤
+        List<Course> filtered = courses.stream()
+                .filter(c -> academicYear == null || academicYear.isEmpty() || academicYear.equals(c.getAcademicYear()))
+                .filter(c -> semester == null || semester.isEmpty() || semester.equals(c.getSemester()))
+                .toList();
+
+        // 按 courseName 去重，保留第一个出现的
+        Map<String, Course> uniqueCourses = new LinkedHashMap<>();
+        for (Course c : filtered) {
+            uniqueCourses.putIfAbsent(c.getCourseName(), c);
         }
-        return options;
+
+        return uniqueCourses.values().stream()
+                .map(c -> new CourseOptionDTO(c.getId(), c.getCourseName()))
+                .toList();
     }
 
     public List<SemesterOptionDTO> getSemesterOptions() {
