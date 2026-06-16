@@ -402,7 +402,7 @@ async function handleSubmit() {
     </p>
 
     <footer class="relative z-10 pb-6 text-center text-xs text-slate-500 dark:text-slate-400">
-      {{ t('login.title') }} · {{ t('message.networkError') }}
+      {{ t('login.footer') }}
     </footer>
   </main>
 </template>

@@ -57,6 +57,15 @@ const stats = ref<StudentStats | null>(null)
 const trend = ref<ScoreTrend | null>(null)
 const radarData = ref<RadarChart | null>(null)
 
+// 分页状态
+const scorePage = ref(1)
+const SCORE_PAGE_SIZE = 8
+const totalScorePages = computed(() => Math.ceil(scores.value.length / SCORE_PAGE_SIZE))
+const paginatedScores = computed(() => {
+  const start = (scorePage.value - 1) * SCORE_PAGE_SIZE
+  return scores.value.slice(start, start + SCORE_PAGE_SIZE)
+})
+
 const radarChartRef = ref<HTMLElement | null>(null)
 const trendChartRef = ref<HTMLElement | null>(null)
 let radarChart: echarts.ECharts | null = null
@@ -67,6 +76,40 @@ const gradeAvgLabel = computed(() => t('overview.gradeAverage'))
 
 const radarSelectedSeries = ref<string[]>([personalLabel.value, classAvgLabel.value, gradeAvgLabel.value])
 const trendSelectedSeries = ref<string[]>([personalLabel.value, classAvgLabel.value, gradeAvgLabel.value])
+
+// 科目筛选
+const selectedCourses = ref<string[]>(['语文', '数学', '英语'])  // 默认选主科
+const availableCourses = computed(() => {
+  if (!trend.value) return []
+  // 从标签中提取唯一的科目名称
+  const subjects = trend.value.examLabels.map(label => {
+    const parts = label.split(' ')
+    return parts[parts.length - 1]
+  })
+  return [...new Set(subjects)]  // 去重，返回 ["语文", "数学", ...]
+})
+const filteredTrendData = computed(() => {
+  if (!trend.value) return null
+  if (selectedCourses.value.length === 0) return null
+
+  // 根据科目名称匹配（而不是完整标签）
+  const indices = trend.value.examLabels
+    .map((label, index) => {
+      const parts = label.split(' ')
+      const subjectName = parts[parts.length - 1]
+      return selectedCourses.value.includes(subjectName) ? index : -1
+    })
+    .filter(i => i !== -1)
+
+  if (indices.length === 0) return null
+
+  return {
+    examLabels: indices.map(i => trend.value!.examLabels[i]),
+    studentScores: indices.map(i => trend.value!.studentScores[i]),
+    classAverages: indices.map(i => trend.value!.classAverages[i]),
+    gradeAverages: indices.map(i => trend.value!.gradeAverages[i]),
+  }
+})
 
 const examTypeOptions = computed(() => [
   { value: "", label: t('student.allExamTypes') },
@@ -121,6 +164,7 @@ async function loadScoresAndStats() {
     ])
 
     scores.value = scoresData
+    scorePage.value = 1
     stats.value = statsData
     radarData.value = radarDataRes
     await nextTick()
@@ -138,6 +182,15 @@ async function loadTrend() {
     renderTrendChart()
   } catch (e) {
     console.error("Failed to load trend", e)
+  }
+}
+
+function toggleCourse(course: string) {
+  const index = selectedCourses.value.indexOf(course)
+  if (index === -1) {
+    selectedCourses.value.push(course)
+  } else {
+    selectedCourses.value.splice(index, 1)
   }
 }
 
@@ -184,13 +237,17 @@ function renderRadarChart() {
     tooltip: { trigger: "item" },
     legend: {
       data: legendData,
-      bottom: 0,
+      selectedMode: false,
+      left: "center",
+      bottom: 12,
+      itemGap: 16,
       textStyle: { color: "#475569", fontSize: 12 },
     },
     radar: {
       indicator: indicators,
       shape: "polygon",
-      radius: "85%",
+      center: ["50%", "43%"],
+      radius: "70%",
       splitNumber: 5,
       axisName: { color: "#475569", fontSize: 12 },
       splitLine: { lineStyle: { color: "#e2e8f0" } },
@@ -202,17 +259,26 @@ function renderRadarChart() {
 }
 
 function renderTrendChart() {
-  if (!trendChartRef.value || !trend.value || trend.value.examLabels.length === 0) return
-
-  if (!trendChart) {
-    trendChart = echarts.init(trendChartRef.value)
+  const data = filteredTrendData.value
+  if (!trendChartRef.value || !data || data.examLabels.length === 0) {
+    if (trendChart) {
+      trendChart.dispose()
+      trendChart = null
+    }
+    return
   }
+
+  // 重新初始化图表（避免旧实例指向已移除的 DOM）
+  if (trendChart) {
+    trendChart.dispose()
+  }
+  trendChart = echarts.init(trendChartRef.value)
 
   const allSeries = [
     {
       name: personalLabel.value,
       type: "line" as const,
-      data: trend.value.studentScores,
+      data: data.studentScores,
       lineStyle: { color: "#155e75", width: 2 },
       itemStyle: { color: "#155e75" },
       symbol: "circle",
@@ -221,7 +287,7 @@ function renderTrendChart() {
     {
       name: classAvgLabel.value,
       type: "line" as const,
-      data: trend.value.classAverages,
+      data: data.classAverages,
       lineStyle: { color: "#15803d", width: 2, type: "dashed" as const },
       itemStyle: { color: "#15803d" },
       symbol: "diamond",
@@ -230,7 +296,7 @@ function renderTrendChart() {
     {
       name: gradeAvgLabel.value,
       type: "line" as const,
-      data: trend.value.gradeAverages,
+      data: data.gradeAverages,
       lineStyle: { color: "#b45309", width: 2, type: "dashed" as const },
       itemStyle: { color: "#b45309" },
       symbol: "triangle",
@@ -260,7 +326,7 @@ function renderTrendChart() {
     },
     xAxis: {
       type: "category",
-      data: trend.value.examLabels,
+      data: data.examLabels,
       axisLine: { lineStyle: { color: "#e2e8f0" } },
       axisLabel: { color: "#64748b", fontSize: 11, rotate: 30 },
     },
@@ -336,6 +402,11 @@ watch(radarSelectedSeries, () => {
 }, { deep: true })
 
 watch(trendSelectedSeries, () => {
+  renderTrendChart()
+}, { deep: true })
+
+watch(selectedCourses, async () => {
+  await nextTick()
   renderTrendChart()
 }, { deep: true })
 </script>
@@ -489,7 +560,7 @@ watch(trendSelectedSeries, () => {
         <h2 class="mb-3 text-sm font-semibold text-[#0f172a] dark:text-white">{{ t('score.course') }}</h2>
         <div class="space-y-3">
           <div
-            v-for="course in scores"
+            v-for="course in paginatedScores"
             :key="course.id"
             class="flex items-center justify-between rounded-md border border-[#f1f5f9] p-3 dark:border-gray-700"
           >
@@ -536,6 +607,25 @@ watch(trendSelectedSeries, () => {
           <div v-if="scores.length === 0" class="py-8 text-center text-sm text-[#94a3b8] dark:text-gray-500">
             {{ t('common.noData') }}
           </div>
+          <div v-if="totalScorePages > 1" class="flex items-center justify-between pt-2">
+            <button
+              @click="scorePage = Math.max(1, scorePage - 1)"
+              :disabled="scorePage === 1"
+              class="rounded-md px-3 py-1.5 text-sm text-[#475569] hover:bg-[#f1f5f9] disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              {{ t('common.prevPage') }}
+            </button>
+            <span class="text-sm text-[#64748b] dark:text-gray-400">
+              {{ t('common.pageInfo', { current: scorePage, total: totalScorePages }) }}
+            </span>
+            <button
+              @click="scorePage = Math.min(totalScorePages, scorePage + 1)"
+              :disabled="scorePage === totalScorePages"
+              class="rounded-md px-3 py-1.5 text-sm text-[#475569] hover:bg-[#f1f5f9] disabled:opacity-50 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              {{ t('common.nextPage') }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -560,7 +650,7 @@ watch(trendSelectedSeries, () => {
             </label>
           </div>
         </div>
-        <div v-if="radarData && radarData.courseNames.length > 0" ref="radarChartRef" class="h-[500px] w-full"></div>
+        <div v-if="radarData && radarData.courseNames.length > 0" ref="radarChartRef" class="h-[560px] w-full"></div>
         <div v-else class="flex h-[500px] items-center justify-center">
           <div class="text-center">
             <Target class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />
@@ -591,7 +681,23 @@ watch(trendSelectedSeries, () => {
           </label>
         </div>
       </div>
-      <div v-if="trend && trend.examLabels.length > 0" ref="trendChartRef" class="h-80 w-full"></div>
+      <!-- 科目标签筛选 -->
+      <div class="mb-4 flex flex-wrap gap-2">
+        <button
+          v-for="course in availableCourses"
+          :key="course"
+          @click="toggleCourse(course)"
+          :class="[
+            'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+            selectedCourses.includes(course)
+              ? 'bg-[#155e75] text-white dark:bg-[#164e63]'
+              : 'bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0] dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+          ]"
+        >
+          {{ course }}
+        </button>
+      </div>
+      <div v-if="filteredTrendData && filteredTrendData.examLabels.length > 0" ref="trendChartRef" class="h-80 w-full"></div>
       <div v-else class="flex h-80 items-center justify-center">
         <div class="text-center">
           <TrendingUp class="mx-auto size-10 text-[#cbd5e1] dark:text-gray-600" />

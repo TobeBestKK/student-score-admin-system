@@ -5,6 +5,7 @@ import { AlertTriangle, Filter, Users } from "@lucide/vue"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { fetchWarnings, type StudentWarnings } from "../../api/warning"
+import { WARNING_LEVEL, WARNING_TYPE } from "@/constants/enum"
 
 const { t } = useI18n()
 
@@ -17,41 +18,41 @@ const selectedType = ref("")
 
 const classOptions = computed(() => [
   { value: "", label: t('warning.allClasses') },
-  { value: "1", label: "1班" },
-  { value: "2", label: "2班" },
-  { value: "3", label: "3班" },
+  { value: "1", label: t('warning.class1') },
+  { value: "2", label: t('warning.class2') },
+  { value: "3", label: t('warning.class3') },
 ])
 
 const levelOptions = computed(() => [
   { value: "", label: t('warning.allLevels') },
-  { value: "普通提醒", label: t('warning.normal') },
-  { value: "重点关注", label: t('warning.focus') },
-  { value: "严重预警", label: t('warning.severe') },
+  { value: WARNING_LEVEL.NORMAL, label: t('warning.normal') },
+  { value: WARNING_LEVEL.FOCUS, label: t('warning.focus') },
+  { value: WARNING_LEVEL.SEVERE, label: t('warning.severe') },
 ])
 
 const typeOptions = computed(() => [
   { value: "", label: t('warning.allTypes') },
-  { value: "单科低分", label: t('warning.lowScore') },
-  { value: "学期平均分偏低", label: t('warning.lowAverage') },
-  { value: "总分排名靠后", label: t('warning.lowRanking') },
-  { value: "累计不及格", label: t('warning.failedCourses') },
+  { value: WARNING_TYPE.LOW_SCORE, label: t('warning.lowScore') },
+  { value: WARNING_TYPE.LOW_AVERAGE, label: t('warning.lowAverage') },
+  { value: WARNING_TYPE.LOW_RANKING, label: t('warning.lowRanking') },
+  { value: WARNING_TYPE.FAILED_COURSES, label: t('warning.failedCourses') },
 ])
 
 const normalCount = computed(() => 
-  warnings.value.filter((w) => w.maxLevel === "普通提醒").length
+  warnings.value.filter((w) => w.maxLevel === WARNING_LEVEL.NORMAL).length
 )
 
 const moderateCount = computed(() => 
-  warnings.value.filter((w) => w.maxLevel === "重点关注").length
+  warnings.value.filter((w) => w.maxLevel === WARNING_LEVEL.FOCUS).length
 )
 
 const severeCount = computed(() => 
-  warnings.value.filter((w) => w.maxLevel === "严重预警").length
+  warnings.value.filter((w) => w.maxLevel === WARNING_LEVEL.SEVERE).length
 )
 
 function getLevelColor(level: string) {
-  if (level === "严重预警") return "bg-[#dc2626] text-white"
-  if (level === "重点关注") return "bg-[#ea580c] text-white"
+  if (level === WARNING_LEVEL.SEVERE) return "bg-[#dc2626] text-white"
+  if (level === WARNING_LEVEL.FOCUS) return "bg-[#ea580c] text-white"
   return "bg-[#16a34a] text-white"
 }
 

@@ -183,13 +183,17 @@ function renderRadarChart() {
     tooltip: { trigger: "item" },
     legend: {
       data: legendData,
-      bottom: 0,
+      selectedMode: false,
+      left: "center",
+      bottom: 12,
+      itemGap: 16,
       textStyle: { color: "#475569", fontSize: 12 },
     },
     radar: {
       indicator: indicators,
       shape: "polygon",
-      radius: "85%",
+      center: ["50%", "43%"],
+      radius: "70%",
       splitNumber: 5,
       axisName: { color: "#475569", fontSize: 12 },
       splitLine: { lineStyle: { color: "#e2e8f0" } },
@@ -559,7 +563,7 @@ watch(trendSelectedSeries, () => {
                 </label>
               </div>
             </div>
-            <div v-if="radarData && radarData.courseNames.length > 0" ref="radarChartRef" class="h-[500px] w-full"></div>
+            <div v-if="radarData && radarData.courseNames.length > 0" ref="radarChartRef" class="h-[520px] w-full"></div>
             <div v-else class="flex h-[500px] items-center justify-center">
               <div class="text-center">
                 <Target class="mx-auto size-10 text-[#cbd5e1]" />

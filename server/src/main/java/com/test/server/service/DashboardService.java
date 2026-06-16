@@ -314,22 +314,58 @@ public class DashboardService {
         List<BigDecimal> classAverages = new ArrayList<>();
         List<BigDecimal> gradeAverages = new ArrayList<>();
 
-        for (ScoreRecord record : records) {
-            Course course = record.getCourse();
-            String label = course.getAcademicYear() + " " + course.getSemester() + " " + record.getExamType() + " " + course.getCourseName();
-            labels.add(label);
-            studentScores.add(record.getScoreValue());
+        // 按课程ID分组
+        Map<Long, List<ScoreRecord>> byCourse = new LinkedHashMap<>();
+        for (ScoreRecord r : records) {
+            byCourse.computeIfAbsent(r.getCourseId(), k -> new ArrayList<>()).add(r);
+        }
 
-            List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, record.getCourseId(), record.getExamType());
-            Object[] avgs = avgList.isEmpty() ? new Object[]{null, null} : avgList.get(0);
-            BigDecimal classAvg = avgs[0] != null ? ((BigDecimal) avgs[0]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-            BigDecimal gradeAvg = avgs[1] != null ? ((BigDecimal) avgs[1]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+        // 对每门课程计算平均
+        for (Map.Entry<Long, List<ScoreRecord>> entry : byCourse.entrySet()) {
+            List<ScoreRecord> courseRecords = entry.getValue();
+            Course course = courseRecords.get(0).getCourse();
+
+            // 标签不含考试类型（因为已合并）
+            String label = course.getAcademicYear() + " " + course.getSemester() + " " + course.getCourseName();
+            labels.add(label);
+
+            // 学生平均分
+            BigDecimal studentAvg = courseRecords.stream()
+                    .map(ScoreRecord::getScoreValue)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(courseRecords.size()), 1, RoundingMode.HALF_UP);
+            studentScores.add(studentAvg);
+
+            // 班级平均和年级平均
+            BigDecimal classAvgSum = BigDecimal.ZERO;
+            BigDecimal gradeAvgSum = BigDecimal.ZERO;
+            int count = 0;
+
+            for (ScoreRecord r : courseRecords) {
+                List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, r.getCourseId(), r.getExamType());
+                if (!avgList.isEmpty()) {
+                    Object[] avgs = avgList.get(0);
+                    if (avgs[0] != null) classAvgSum = classAvgSum.add((BigDecimal) avgs[0]);
+                    if (avgs[1] != null) gradeAvgSum = gradeAvgSum.add((BigDecimal) avgs[1]);
+                    count++;
+                }
+            }
+
+            BigDecimal classAvg = count > 0 ?
+                    classAvgSum.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            BigDecimal gradeAvg = count > 0 ?
+                    gradeAvgSum.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+
             classAverages.add(classAvg);
             gradeAverages.add(gradeAvg);
         }
 
         return new ScoreTrendDTO(labels, studentScores, classAverages, gradeAverages);
     }
+
+    private static final Set<String> CORE_COURSES = Set.of(
+            "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治"
+    );
 
     public RadarChartDTO getRadarData(Long studentId, String academicYear, String semester, String examType) {
         List<ScoreRecord> records = scoreRecordRepository.findByStudentAndFilters(studentId, academicYear, semester, examType);
@@ -339,14 +375,52 @@ public class DashboardService {
         List<BigDecimal> classAverages = new ArrayList<>();
         List<BigDecimal> gradeAverages = new ArrayList<>();
 
-        for (ScoreRecord record : records) {
-            courseNames.add(record.getCourse().getCourseName());
-            studentScores.add(record.getScoreValue());
+        boolean isAllSemesters = (academicYear == null || academicYear.isEmpty());
 
-            List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, record.getCourseId(), record.getExamType());
-            Object[] avgs = avgList.isEmpty() ? new Object[]{null, null} : avgList.get(0);
-            BigDecimal classAvg = avgs[0] != null ? ((BigDecimal) avgs[0]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-            BigDecimal gradeAvg = avgs[1] != null ? ((BigDecimal) avgs[1]).setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+        // 全部模式按 courseName 分组，单学期按 courseId 分组
+        Map<String, List<ScoreRecord>> grouped = new LinkedHashMap<>();
+        for (ScoreRecord r : records) {
+            String key = isAllSemesters ? r.getCourse().getCourseName() : String.valueOf(r.getCourseId());
+            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(r);
+        }
+
+        for (Map.Entry<String, List<ScoreRecord>> entry : grouped.entrySet()) {
+            List<ScoreRecord> courseRecords = entry.getValue();
+            Course course = courseRecords.get(0).getCourse();
+
+            // 全部模式下跳过非核心科目
+            if (isAllSemesters && !CORE_COURSES.contains(course.getCourseName())) {
+                continue;
+            }
+
+            // 学生平均分 = 所有考试类型的平均
+            BigDecimal studentAvg = courseRecords.stream()
+                    .map(ScoreRecord::getScoreValue)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(courseRecords.size()), 1, RoundingMode.HALF_UP);
+
+            // 班级平均和年级平均
+            BigDecimal classAvgSum = BigDecimal.ZERO;
+            BigDecimal gradeAvgSum = BigDecimal.ZERO;
+            int count = 0;
+
+            for (ScoreRecord r : courseRecords) {
+                List<Object[]> avgList = scoreRecordRepository.findCourseAverages(studentId, r.getCourseId(), r.getExamType());
+                if (!avgList.isEmpty()) {
+                    Object[] avgs = avgList.get(0);
+                    if (avgs[0] != null) classAvgSum = classAvgSum.add((BigDecimal) avgs[0]);
+                    if (avgs[1] != null) gradeAvgSum = gradeAvgSum.add((BigDecimal) avgs[1]);
+                    count++;
+                }
+            }
+
+            BigDecimal classAvg = count > 0 ?
+                    classAvgSum.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            BigDecimal gradeAvg = count > 0 ?
+                    gradeAvgSum.divide(BigDecimal.valueOf(count), 1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+
+            courseNames.add(course.getCourseName());
+            studentScores.add(studentAvg);
             classAverages.add(classAvg);
             gradeAverages.add(gradeAvg);
         }
