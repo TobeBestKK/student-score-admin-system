@@ -214,6 +214,16 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecord, Long> 
             @Param("studentId") Long studentId,
             @Param("examType") String examType);
 
+    @Query(value = "SELECT sr.*, co.course_name, co.academic_year, co.semester " +
+            "FROM score_record sr " +
+            "JOIN course co ON sr.course_id = co.id " +
+            "WHERE sr.student_id IN :studentIds AND sr.exam_type = :examType AND sr.is_deleted = 0 " +
+            "ORDER BY sr.student_id, co.academic_year DESC, co.semester, co.course_name",
+            nativeQuery = true)
+    List<ScoreRecord> findByStudentIdInAndExamType(
+            @Param("studentIds") List<Long> studentIds,
+            @Param("examType") String examType);
+
     @Query(value = "SELECT sr.* FROM score_record sr " +
             "JOIN student s ON sr.student_id = s.id " +
             "WHERE s.class_id = :classId AND sr.exam_type = '期末' AND sr.is_deleted = 0",

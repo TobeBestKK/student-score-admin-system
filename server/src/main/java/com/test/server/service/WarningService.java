@@ -3,6 +3,7 @@ package com.test.server.service;
 import com.test.server.config.WarningThresholdConfig;
 import com.test.server.config.WarningThresholdConfig.WarningLevel;
 import com.test.server.config.WarningThresholdConfig.WarningType;
+import com.test.server.dto.ScoreHistoryDTO;
 import com.test.server.dto.WarningItemDTO;
 import com.test.server.dto.StudentWarningsDTO;
 import com.test.server.entity.Course;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,36 +33,71 @@ public class WarningService {
                 .orElseThrow(() -> new RuntimeException("学生不存在"));
 
         List<ScoreRecord> records = scoreRecordRepository.findByStudentIdAndExamType(studentId, "期末");
+        List<ScoreRecord> allRecords = scoreRecordRepository.findByStudentIdAllSemesters(studentId);
+        return buildStudentWarnings(student, records, allRecords);
+    }
+
+    public StudentWarningsDTO calculateStudentWarnings(Long studentId, String academicYear, String semester) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("学生不存在"));
+
+        List<ScoreRecord> records = scoreRecordRepository.findByStudentIdOrderedWithFilters(
+                studentId, academicYear, semester, "期末");
+        List<ScoreRecord> allRecords = scoreRecordRepository.findByStudentIdAllSemesters(studentId);
+        return buildStudentWarnings(student, records, allRecords);
+    }
+
+    private StudentWarningsDTO buildStudentWarnings(Student student, List<ScoreRecord> records, List<ScoreRecord> allRecords) {
+        Long studentId = student.getId();
         List<WarningItemDTO> warnings = new ArrayList<>();
         WarningLevel maxLevel = null;
+
+        // Build course name to history map
+        Map<String, List<ScoreHistoryDTO>> courseHistoryMap = new HashMap<>();
+        for (ScoreRecord record : allRecords) {
+            Course course = record.getCourse();
+            String courseName = course.getCourseName();
+            courseHistoryMap.computeIfAbsent(courseName, k -> new ArrayList<>())
+                    .add(new ScoreHistoryDTO(
+                            course.getAcademicYear(),
+                            course.getSemester(),
+                            record.getExamType(),
+                            record.getScoreValue().intValue()
+                    ));
+        }
 
         // 1. 单科预警
         for (ScoreRecord record : records) {
             BigDecimal score = record.getScoreValue();
-            String courseName = record.getCourse().getCourseName();
+            Course course = record.getCourse();
+            String courseName = course.getCourseName();
+            String academicYear = course.getAcademicYear();
+            String semester = course.getSemester();
+            String timePrefix = academicYear + " " + semester + " ";
+            List<ScoreHistoryDTO> history = courseHistoryMap.getOrDefault(courseName, Collections.emptyList());
 
             if (score.doubleValue() < WarningThresholdConfig.FAIL_SCORE) {
-                // 重点关注: 单科 < 60
-                String reason = "期末《" + courseName + "》" + score.intValue() + " 分，触发重点关注";
+                String reason = timePrefix + "期末《" + courseName + "》" + score.intValue() + " 分，触发重点关注";
                 warnings.add(new WarningItemDTO(
                         WarningType.LOW_SCORE.getLabel(),
                         WarningLevel.MODERATE.getLabel(),
                         courseName,
                         String.valueOf(score.intValue()),
                         "< 60",
-                        reason
+                        reason,
+                        history
                 ));
                 maxLevel = maxLevel == null ? WarningLevel.MODERATE : WarningLevel.max(maxLevel, WarningLevel.MODERATE);
             } else if (score.doubleValue() <= WarningThresholdConfig.LOW_SCORE_MAX) {
-                // 普通提醒: 单科 60-65
-                String reason = "期末《" + courseName + "》" + score.intValue() + " 分，触发普通提醒";
+                String reason = timePrefix + "期末《" + courseName + "》" + score.intValue() + " 分，触发普通提醒";
                 warnings.add(new WarningItemDTO(
                         WarningType.LOW_SCORE.getLabel(),
                         WarningLevel.NORMAL.getLabel(),
                         courseName,
                         String.valueOf(score.intValue()),
                         "60-65",
-                        reason
+                        reason,
+                        history
                 ));
                 maxLevel = maxLevel == null ? WarningLevel.NORMAL : WarningLevel.max(maxLevel, WarningLevel.NORMAL);
             }
@@ -82,7 +119,8 @@ public class WarningService {
                     null,
                     String.valueOf(failCount),
                     ">= " + WarningThresholdConfig.FAIL_COUNT_SEVERE_MIN,
-                    reason
+                    reason,
+                    Collections.emptyList()
             ));
             maxLevel = WarningLevel.SEVERE;
         } else if (failCount >= 1) {
@@ -93,7 +131,8 @@ public class WarningService {
                     null,
                     String.valueOf(failCount),
                     "1-" + WarningThresholdConfig.FAIL_COUNT_MODERATE_MAX,
-                    reason
+                    reason,
+                    Collections.emptyList()
             ));
             maxLevel = maxLevel == null ? WarningLevel.MODERATE : WarningLevel.max(maxLevel, WarningLevel.MODERATE);
         }
@@ -122,7 +161,8 @@ public class WarningService {
                         null,
                         avg.toString(),
                         "< " + WarningThresholdConfig.SEMESTER_AVG_THRESHOLD,
-                        reason
+                        reason,
+                        Collections.emptyList()
                 ));
                 maxLevel = maxLevel == null ? WarningLevel.NORMAL : WarningLevel.max(maxLevel, WarningLevel.NORMAL);
             }
@@ -151,7 +191,8 @@ public class WarningService {
                             null,
                             classRank + "/" + classTotal,
                             "后 30%",
-                            reason
+                            reason,
+                            Collections.emptyList()
                     ));
                     maxLevel = maxLevel == null ? WarningLevel.NORMAL : WarningLevel.max(maxLevel, WarningLevel.NORMAL);
                 }
@@ -179,7 +220,8 @@ public class WarningService {
                             null,
                             gradeRank + "/" + gradeTotal,
                             "后 30%",
-                            reason
+                            reason,
+                            Collections.emptyList()
                     ));
                     maxLevel = maxLevel == null ? WarningLevel.NORMAL : WarningLevel.max(maxLevel, WarningLevel.NORMAL);
                 }
@@ -199,9 +241,20 @@ public class WarningService {
 
     public List<StudentWarningsDTO> calculateClassWarnings(Long classId) {
         List<Student> students = studentRepository.findByClassId(classId);
+        if (students.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> studentIds = students.stream().map(Student::getId).collect(Collectors.toList());
+        List<ScoreRecord> allRecords = scoreRecordRepository.findByStudentIdInAndExamType(studentIds, "期末");
+
+        Map<Long, List<ScoreRecord>> recordsByStudent = allRecords.stream()
+                .collect(Collectors.groupingBy(ScoreRecord::getStudentId));
+
         List<StudentWarningsDTO> result = new ArrayList<>();
         for (Student student : students) {
-            result.add(calculateStudentWarnings(student.getId()));
+            List<ScoreRecord> records = recordsByStudent.getOrDefault(student.getId(), Collections.emptyList());
+            result.add(buildStudentWarnings(student, records, records));
         }
         return result;
     }
@@ -216,9 +269,20 @@ public class WarningService {
             students = studentRepository.findAll();
         }
 
+        if (students.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> studentIds = students.stream().map(Student::getId).collect(Collectors.toList());
+        List<ScoreRecord> allRecords = scoreRecordRepository.findByStudentIdInAndExamType(studentIds, "期末");
+
+        Map<Long, List<ScoreRecord>> recordsByStudent = allRecords.stream()
+                .collect(Collectors.groupingBy(ScoreRecord::getStudentId));
+
         List<StudentWarningsDTO> result = new ArrayList<>();
         for (Student student : students) {
-            StudentWarningsDTO sw = calculateStudentWarnings(student.getId());
+            List<ScoreRecord> records = recordsByStudent.getOrDefault(student.getId(), Collections.emptyList());
+            StudentWarningsDTO sw = buildStudentWarnings(student, records, records);
             if (sw.getMaxLevel() == null) continue;
 
             if (level != null && !level.isEmpty() && !level.equals(sw.getMaxLevel())) continue;

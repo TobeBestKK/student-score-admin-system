@@ -1,5 +1,12 @@
 import api from './index'
 
+export interface ScoreHistory {
+  academicYear: string
+  semester: string
+  examType: string
+  score: number
+}
+
 export interface WarningItem {
   type: string
   level: string
@@ -7,6 +14,7 @@ export interface WarningItem {
   currentValue: string
   threshold: string
   reason: string
+  history: ScoreHistory[]
 }
 
 export interface StudentWarnings {
@@ -27,6 +35,6 @@ export function fetchClassWarnings(classId: number): Promise<StudentWarnings[]> 
   return api.get(`/warnings/class/${classId}`)
 }
 
-export function fetchStudentWarnings(studentId: number): Promise<StudentWarnings> {
-  return api.get('/student/warnings', { params: { studentId } })
+export function fetchStudentWarnings(studentId: number, academicYear?: string, semester?: string): Promise<StudentWarnings> {
+  return api.get('/student/warnings', { params: { studentId, academicYear, semester } })
 }
