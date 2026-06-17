@@ -16,8 +16,10 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/courses")
-    public ResponseEntity<List<CourseOptionDTO>> getCourses() {
-        return ResponseEntity.ok(dashboardService.getCourseOptions());
+    public ResponseEntity<List<CourseOptionDTO>> getCourses(
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String semester) {
+        return ResponseEntity.ok(dashboardService.getCourseOptions(academicYear, semester));
     }
 
     @GetMapping("/semesters")

@@ -21,6 +21,7 @@ import CardTitle from "@/components/ui/card/CardTitle.vue"
 import Button from "@/components/ui/button/Button.vue"
 import Input from "@/components/ui/input/Input.vue"
 import Label from "@/components/ui/label/Label.vue"
+import { EXAM_TYPE, GRADE_LEVEL, REMARK } from "@/constants/enum"
 
 const { t } = useI18n()
 
@@ -54,8 +55,8 @@ const stats = ref({ totalRecords: 0, averageScore: 0, passRate: 0, failCount: 0 
 
 const examTypeOptions = computed(() => [
   { value: "", label: t('student.allExamTypes') },
-  { value: "期中", label: t('score.midterm') },
-  { value: "期末", label: t('score.final') },
+  { value: EXAM_TYPE.MIDTERM, label: t('score.midterm') },
+  { value: EXAM_TYPE.FINAL, label: t('score.final') },
 ])
 
 const showModal = ref(false)
@@ -64,17 +65,17 @@ const currentRecord = ref<ScoreRecord | null>(null)
 const formLoading = ref(false)
 
 const remarkOptions = computed(() => [
-  { value: "优", label: t('score.remarkExcellent') },
-  { value: "良", label: t('score.remarkGood') },
-  { value: "中", label: t('score.remarkMedium') },
-  { value: "差", label: t('score.remarkPoor') },
+  { value: REMARK.EXCELLENT, label: t('score.remarkExcellent') },
+  { value: REMARK.GOOD, label: t('score.remarkGood') },
+  { value: REMARK.MEDIUM, label: t('score.remarkMedium') },
+  { value: REMARK.POOR, label: t('score.remarkPoor') },
 ])
 
 const form = ref<ScoreRecordCreate>({
   studentId: 0,
   courseId: 0,
   scoreValue: 0,
-  examType: "期末",
+  examType: EXAM_TYPE.FINAL,
   remark: "",
 })
 
@@ -104,7 +105,8 @@ async function loadSemesters() {
 
 async function loadCourses() {
   try {
-    courseOptions.value = await fetchCourseOptions()
+    const semesterParams = getSemesterParams()
+    courseOptions.value = await fetchCourseOptions(semesterParams)
   } catch (e) {
     console.error("Failed to load courses", e)
   }
@@ -172,7 +174,7 @@ async function openCreateModal() {
     studentId: studentOptions.value[0]?.id || 0,
     courseId: courseOptions.value[0]?.id || 0,
     scoreValue: 0,
-    examType: "期末",
+    examType: EXAM_TYPE.FINAL,
     remark: "",
   }
   showModal.value = true
@@ -269,18 +271,18 @@ async function handleDelete() {
 }
 
 function getGradeColor(grade: string) {
-  if (grade === "优秀") return "bg-[#dcfce7] text-[#15803d]"
-  if (grade === "良好") return "bg-[#e0f2fe] text-[#155e75]"
-  if (grade === "中等") return "bg-[#fef3c7] text-[#b45309]"
-  if (grade === "及格") return "bg-[#fef2f2] text-[#dc2626]"
+  if (grade === GRADE_LEVEL.EXCELLENT) return "bg-[#dcfce7] text-[#15803d]"
+  if (grade === GRADE_LEVEL.GOOD) return "bg-[#e0f2fe] text-[#155e75]"
+  if (grade === GRADE_LEVEL.MEDIUM) return "bg-[#fef3c7] text-[#b45309]"
+  if (grade === GRADE_LEVEL.PASS) return "bg-[#fef2f2] text-[#dc2626]"
   return "bg-[#f1f5f9] text-[#64748b]"
 }
 
 function getRemarkColor(remark: string | null) {
-  if (remark === "优") return "bg-[#dcfce7] text-[#15803d]"
-  if (remark === "良") return "bg-[#e0f2fe] text-[#155e75]"
-  if (remark === "中") return "bg-[#fef3c7] text-[#b45309]"
-  if (remark === "差") return "bg-[#fef2f2] text-[#dc2626]"
+  if (remark === REMARK.EXCELLENT) return "bg-[#dcfce7] text-[#15803d]"
+  if (remark === REMARK.GOOD) return "bg-[#e0f2fe] text-[#155e75]"
+  if (remark === REMARK.MEDIUM) return "bg-[#fef3c7] text-[#b45309]"
+  if (remark === REMARK.POOR) return "bg-[#fef2f2] text-[#dc2626]"
   return "bg-[#f1f5f9] text-[#64748b]"
 }
 
@@ -292,6 +294,7 @@ function formatDate(dateStr: string) {
 
 watch(selectedSemester, () => {
   query.value.page = 0
+  loadCourses()
   loadScores()
 })
 
@@ -351,7 +354,7 @@ onMounted(async () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <Label class="text-xs dark:text-gray-400">学生姓名/学号</Label>
+            <Label class="text-xs dark:text-gray-400">{{ t('student.nameAndId') }}</Label>
             <Input v-model="query.keyword" :placeholder="t('student.searchPlaceholder')" class="w-48 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" />
           </div>
 
@@ -593,8 +596,8 @@ onMounted(async () => {
               class="h-9 rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-[#475569] focus:outline-none focus:ring-2 focus:ring-[#155e75]"
               required
             >
-              <option value="期中">{{ t('score.midterm') }}</option>
-              <option value="期末">{{ t('score.final') }}</option>
+              <option :value="EXAM_TYPE.MIDTERM">{{ t('score.midterm') }}</option>
+              <option :value="EXAM_TYPE.FINAL">{{ t('score.final') }}</option>
             </select>
           </div>
 

@@ -20,6 +20,7 @@ import Input from "@/components/ui/input/Input.vue"
 import Label from "@/components/ui/label/Label.vue"
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { WARNING_LEVEL } from "@/constants/enum"
 
 const route = useRoute()
 const { t } = useI18n()
@@ -39,7 +40,7 @@ const chartRef = ref<HTMLElement | null>(null)
 let chartInstance: echarts.ECharts | null = null
 
 const warningSummary = computed(() => {
-  const counts: Record<string, number> = { "普通提醒": 0, "重点关注": 0, "严重预警": 0 }
+  const counts: Record<string, number> = { [WARNING_LEVEL.NORMAL]: 0, [WARNING_LEVEL.FOCUS]: 0, [WARNING_LEVEL.SEVERE]: 0 }
   for (const w of allWarnings.value) {
     if (w.maxLevel && counts[w.maxLevel] !== undefined) {
       counts[w.maxLevel]++
@@ -51,8 +52,8 @@ const warningSummary = computed(() => {
 const warningStudents = computed(() => allWarnings.value.filter(w => w.maxLevel != null))
 
 function getWarningLevelLabel(level: string) {
-  if (level === "严重预警") return t('warning.severe')
-  if (level === "重点关注") return t('warning.focus')
+  if (level === WARNING_LEVEL.SEVERE) return t('warning.severe')
+  if (level === WARNING_LEVEL.FOCUS) return t('warning.focus')
   return t('warning.normal')
 }
 
@@ -154,20 +155,20 @@ function renderChart() {
 }
 
 function getWarningLevelClass(level: string) {
-  if (level === "严重预警") return "bg-[#fef2f2] text-[#dc2626]"
-  if (level === "重点关注") return "bg-[#fff7ed] text-[#c2410c]"
+  if (level === WARNING_LEVEL.SEVERE) return "bg-[#fef2f2] text-[#dc2626]"
+  if (level === WARNING_LEVEL.FOCUS) return "bg-[#fff7ed] text-[#c2410c]"
   return "bg-[#fefce8] text-[#a16207]"
 }
 
 function getWarningLevelCardClass(level: string) {
-  if (level === "严重预警") return "border-[#fca5a5] bg-[#fef2f2]"
-  if (level === "重点关注") return "border-[#fdba74] bg-[#fff7ed]"
+  if (level === WARNING_LEVEL.SEVERE) return "border-[#fca5a5] bg-[#fef2f2]"
+  if (level === WARNING_LEVEL.FOCUS) return "border-[#fdba74] bg-[#fff7ed]"
   return "border-[#fde68a] bg-[#fefce8]"
 }
 
 function getWarningLevelTextClass(level: string) {
-  if (level === "严重预警") return "text-[#dc2626]"
-  if (level === "重点关注") return "text-[#c2410c]"
+  if (level === WARNING_LEVEL.SEVERE) return "text-[#dc2626]"
+  if (level === WARNING_LEVEL.FOCUS) return "text-[#c2410c]"
   return "text-[#a16207]"
 }
 

@@ -48,8 +48,8 @@ export interface RecentRecord {
   createTime: string
 }
 
-export function fetchCourseOptions(): Promise<CourseOption[]> {
-  return api.get('/dashboard/courses')
+export function fetchCourseOptions(params?: { academicYear?: string; semester?: string }): Promise<CourseOption[]> {
+  return api.get('/dashboard/courses', { params })
 }
 
 export function fetchSemesterOptions(): Promise<SemesterOption[]> {

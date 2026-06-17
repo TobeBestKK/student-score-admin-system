@@ -28,6 +28,7 @@ import {
   type Warning,
   type RecentRecord,
 } from "@/api/dashboard"
+import { WARNING_TYPE } from "@/constants/enum"
 import Card from "@/components/ui/card/Card.vue"
 import CardContent from "@/components/ui/card/CardContent.vue"
 
@@ -68,7 +69,8 @@ async function loadSemesters() {
 
 async function loadCourses() {
   try {
-    courseOptions.value = await fetchCourseOptions()
+    const semesterParams = getSemesterParams()
+    courseOptions.value = await fetchCourseOptions(semesterParams)
   } catch (e) {
     console.error("Failed to load courses", e)
   }
@@ -199,7 +201,7 @@ function formatDate(dateStr: string) {
 }
 
 function getWarningColor(type: string) {
-  if (type === "不及格") return "text-[#dc2626]"
+  if (type === WARNING_TYPE.FAIL) return "text-[#dc2626]"
   return "text-[#b45309]"
 }
 
@@ -220,6 +222,7 @@ onUnmounted(() => {
 })
 
 watch(selectedSemester, () => {
+  loadCourses()
   loadAllData()
 })
 
@@ -480,7 +483,7 @@ watch(selectedCourseId, () => {
             class="rounded-md border border-[#e2e8f0] p-3 dark:border-gray-700"
           >
             <p class="text-xs text-[#64748b] dark:text-gray-400">{{ item.type }}</p>
-            <p :class="['mt-1 text-xl font-semibold', getWarningColor(item.type)]">{{ item.count }} 人</p>
+            <p :class="['mt-1 text-xl font-semibold', getWarningColor(item.type)]">{{ item.count }} {{ t('unit.person') }}</p>
           </div>
         </div>
         <div v-if="warningData.length === 0" class="py-6 text-center text-sm text-[#94a3b8] dark:text-gray-500">

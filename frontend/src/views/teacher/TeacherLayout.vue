@@ -21,7 +21,7 @@ const sidebarCollapsed = ref(false)
 
 const userInfo = computed(() => {
   const str = localStorage.getItem('userInfo')
-  return str ? JSON.parse(str) : { name: '教师', role: 'teacher' }
+  return str ? JSON.parse(str) : { name: t('teacher.defaultName'), role: 'teacher' }
 })
 
 const currentTitle = computed(() => {
