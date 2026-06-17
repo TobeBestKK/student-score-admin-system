@@ -29,7 +29,7 @@ const currentTitle = computed(() => {
   if (path.startsWith('/teacher/classes')) return t('nav.classes')
   if (path.startsWith('/teacher/students')) return t('nav.students')
   if (path.startsWith('/teacher/scores')) return t('nav.scoreManage')
-  if (path.startsWith('/teacher/warnings')) return t('nav.warnings')
+  if (path.startsWith('/teacher/warnings')) return t('nav.teacherWarnings')
   if (path.startsWith('/teacher/settings')) return t('nav.settings')
   return t('nav.dashboard')
 })
@@ -39,7 +39,7 @@ const menuItems = computed(() => [
   { icon: Users, label: t('nav.classes'), path: '/teacher/classes' },
   { icon: User, label: t('nav.students'), path: '/teacher/students' },
   { icon: FileText, label: t('nav.scoreManage'), path: '/teacher/scores' },
-  { icon: AlertTriangle, label: t('nav.warnings'), path: '/teacher/warnings' },
+  { icon: AlertTriangle, label: t('nav.teacherWarnings'), path: '/teacher/warnings' },
   { icon: Settings, label: t('nav.settings'), path: '/teacher/settings' },
 ])
 
