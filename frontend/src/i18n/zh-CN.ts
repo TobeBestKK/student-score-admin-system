@@ -271,8 +271,13 @@ export default {
     warningWorkbench: '预警工作台',
     scoreDistribution: '成绩分布',
     courseRanking: '各科排名统计',
+    avgScore: '班级平均分',
+    passRateLabel: '及格率',
+    failCountLabel: '不及格人次',
+    totalStudentsLabel: '总人数',
     inputClassName: '输入班级名称',
     noStudentWarning: '暂无预警学生',
+    onlyWarningStudents: '仅显示有预警学生',
   },
   course: {
     info: '课程信息',

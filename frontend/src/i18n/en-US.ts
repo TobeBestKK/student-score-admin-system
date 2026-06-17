@@ -271,8 +271,13 @@ export default {
     warningWorkbench: 'Warning Workbench',
     scoreDistribution: 'Score Distribution',
     courseRanking: 'Course Rankings',
+    avgScore: 'Class Average',
+    passRateLabel: 'Pass Rate',
+    failCountLabel: 'Fail Count',
+    totalStudentsLabel: 'Total Students',
     inputClassName: 'Enter class name',
     noStudentWarning: 'No warning students',
+    onlyWarningStudents: 'Only show students with warnings',
   },
   course: {
     info: 'Course Info',
