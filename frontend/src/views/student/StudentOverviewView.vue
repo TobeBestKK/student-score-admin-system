@@ -203,7 +203,7 @@ function renderRadarChart() {
 
   const indicators = radarData.value.courseNames.map((name) => ({
     name: name,
-    max: 100,
+    max: getCourseMaxScore(name),
   }))
 
   const allSeries = [
@@ -333,7 +333,7 @@ function renderTrendChart() {
     yAxis: {
       type: "value",
       min: 0,
-      max: 100,
+      max: data.examLabels.some((l: string) => l.includes('语文') || l.includes('数学') || l.includes('英语')) ? 150 : 100,
       axisLine: { show: false },
       splitLine: { lineStyle: { color: "#f1f5f9" } },
       axisLabel: { color: "#64748b", fontSize: 12 },
@@ -354,6 +354,10 @@ const warnings = computed(() => {
       message: s.scoreValue < 60 ? t('overview.failAndRetake') : t('overview.lowScoreWarning'),
     }))
 })
+
+function getCourseMaxScore(name: string): number {
+  return (name.includes('语文') || name.includes('数学') || name.includes('英语')) ? 150 : 100
+}
 
 function getScoreColor(score: number) {
   if (score >= 90) return "text-[#15803d]"

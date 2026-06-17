@@ -34,6 +34,7 @@ export default {
     prevPage: 'Previous',
     nextPage: 'Next',
     pageInfo: 'Page {current} / {total}',
+    viewMore: 'View More',
   },
   login: {
     title: 'Student Score Analysis System',
@@ -84,6 +85,7 @@ export default {
     scores: 'Scores',
     trend: 'Score Trend',
     warnings: 'Warnings',
+    teacherWarnings: 'Warnings',
     ranking: 'Ranking',
     settings: 'Settings',
     logout: 'Logout',
@@ -200,6 +202,7 @@ export default {
     remarkMedium: 'C',
     remarkPoor: 'D',
     entryTime: 'Entry Time',
+    recordTime: 'Record Time',
   },
   student: {
     info: 'Student Info',
@@ -406,6 +409,7 @@ export default {
     recentScore: 'Recent Score',
     lastScore: 'Last Score',
     change: 'Change',
+    changeRange: 'Change',
     direction: 'Trend',
     noComparisonData: 'No comparison data',
     noChangeData: 'No score change data',

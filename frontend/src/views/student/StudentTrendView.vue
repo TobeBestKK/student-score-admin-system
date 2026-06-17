@@ -50,6 +50,10 @@ const examTypeOptions = computed(() => [
   { value: "期末", label: t('score.final') },
 ])
 
+function getCourseMaxScore(name: string): number {
+  return (name.includes('语文') || name.includes('数学') || name.includes('英语')) ? 150 : 100
+}
+
 function getSemesterParams() {
   if (!selectedSemester.value) return {}
   const parts = selectedSemester.value.split("-")
@@ -133,7 +137,7 @@ function renderTrendChart() {
     yAxis: {
       type: "value",
       min: 0,
-      max: 100,
+      max: trend.value.examLabels.some(l => l.includes('语文') || l.includes('数学') || l.includes('英语')) ? 150 : 100,
       axisLine: { show: false },
       splitLine: { lineStyle: { color: "#f1f5f9" } },
       axisLabel: { color: "#64748b", fontSize: 12 },
@@ -212,7 +216,7 @@ function renderBarChart() {
     yAxis: {
       type: "value",
       min: 0,
-      max: 100,
+      max: courseNames.some(n => n.includes('语文') || n.includes('数学') || n.includes('英语')) ? 150 : 100,
       axisLine: { show: false },
       splitLine: { lineStyle: { color: "#f1f5f9" } },
       axisLabel: { color: "#64748b", fontSize: 12 },

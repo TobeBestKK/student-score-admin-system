@@ -34,6 +34,7 @@ export default {
     prevPage: '上一页',
     nextPage: '下一页',
     pageInfo: '第 {current} 页 / 共 {total} 页',
+    viewMore: '查看更多',
   },
   login: {
     title: '学生成绩分析系统',
@@ -84,6 +85,7 @@ export default {
     scores: '课程成绩',
     trend: '成绩趋势',
     warnings: '预警中心',
+    teacherWarnings: '预警管理',
     ranking: '我的排名',
     settings: '个人设置',
     logout: '退出登录',
@@ -200,6 +202,7 @@ export default {
     remarkMedium: '中',
     remarkPoor: '差',
     entryTime: '录入时间',
+    recordTime: '录入时间',
   },
   student: {
     info: '学生信息',
@@ -406,6 +409,7 @@ export default {
     recentScore: '最近成绩',
     lastScore: '上次成绩',
     change: '变化幅度',
+    changeRange: '变化幅度',
     direction: '趋势',
     noComparisonData: '暂无对比数据',
     noChangeData: '暂无成绩变化数据',
